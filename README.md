@@ -74,14 +74,34 @@ Pourquoi trois couches :
 
 ## Modèle de données (couche Gold)
 
-Le modèle est une **constellation de faits** : deux tables de faits qui partagent les mêmes dimensions.
+La couche Gold comprend une **constellation de faits** pour les consultations et les hospitalisations, ainsi que deux **schémas en étoile** pour les décès et la satisfaction.
 
-![Schéma Gold](Christopher/MLD%20-%20Conception/schema-gold-constellation.jpg)
+### Consultations et hospitalisations : constellation de faits
+
+Deux tables de faits partagent les mêmes dimensions.
+
+![Schéma Gold : constellation de faits](Christopher/MLD%20-%20Conception/schema-gold-constellation.jpg)
 
 - **Faits :** `fait_consultation` et `fait_hospitalisation`.
 - **Dimensions :** `dim_temps`, `dim_patient` (pseudonymisé, sans nom ni adresse), `dim_diagnostic`, `dim_professionnel`, `dim_etablissement`.
 - **Table de pont :** `pont_prof_etab` rattache une consultation à un établissement par le professionnel. Elle est pondérée (poids = 1 ÷ nombre d'établissements du professionnel) pour que les comptages restent justes.
 - Les taux sont calculés dans Power BI : nombre d'événements ÷ nombre de patients distincts du même filtre.
+
+### Décès : schéma en étoile
+
+![Schéma Gold : étoile des décès](Christopher/MLD%20-%20Conception/schema-gold-deces.jpg)
+
+- **Fait :** `fait_deces`, une ligne par décès, avec la date, la commune et le numéro d'acte de décès.
+- **Dimensions :** `dim_temps_deces`, `dim_lieu_deces` et `dim_defunt`.
+- **Analyse visée :** dénombrement des décès par période et par lieu. Le regroupement par région nécessite un rattachement des départements aux régions INSEE.
+
+### Satisfaction : schéma en étoile
+
+![Schéma Gold : étoile de la satisfaction](Christopher/MLD%20-%20Conception/schema-gold-satisfaction.jpg)
+
+- **Fait :** `fait_satisfaction`, une ligne par établissement et par année, identifiée par le couple (`finess`, `annee`).
+- **Dimensions :** `dim_temps_satisfaction` et `dim_etablissement_satisfaction`, qui porte notamment la région.
+- **Mesures :** score ajusté `score_all_rea_ajust` et nombre de réponses `nb_rep_score_all_rea_ajust`, pour l'analyse de la satisfaction par année, établissement et région.
 
 ## Gouvernance et conformité
 
@@ -100,7 +120,7 @@ Mesures prévues, d'après la fiche CNIL « RGPD : établissements de santé » 
 | 3. Implémentation physique | Création des tables, chargement, partitionnement, indexation, tests de qualité | À venir |
 | 4. Exploitation et visualisation | Optimisation, benchmarks avant/après, tableau de bord et storytelling | À venir |
 
-Points encore ouverts : format et fréquence de la source Satisfaction, modélisation des faits Décès et Satisfaction et de la dimension Région INSEE, estimation des coûts.
+Points encore ouverts : format et fréquence de la source Satisfaction, rattachement des lieux de décès aux régions INSEE, estimation des coûts.
 
 ## Organisation du dépôt
 
@@ -110,5 +130,5 @@ Chaque membre de l'équipe dispose de son dossier.
 |---|---|
 | `Christopher/Architecture/` | Schémas de l'architecture globale |
 | `Christopher/ETL/` | Architecture cible et couches Bronze/Silver/Gold (JPEG et PDF) |
-| `Christopher/MLD - Conception/` | Schéma de la base décisionnelle (constellation de faits) |
+| `Christopher/MLD - Conception/` | Schémas Gold : constellation consultations/hospitalisations et étoiles décès et satisfaction |
 | `Gael/`, `Mathis/`, `Thomas/` | Travaux des autres membres |
