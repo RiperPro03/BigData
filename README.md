@@ -58,7 +58,7 @@ PostgreSQL est une source de l'architecture, jamais la cible.
 
 Les données montent en qualité par étapes, sans jamais écraser les fichiers d'origine.
 
-![Architecture en médaillon](Christopher/ETL/ETL_architecture-medaillon-schema.jpg)
+![Architecture en médaillon](Christopher/ETL/architecture-medaillon.jpg)
 
 | Couche | Contenu | Accès |
 |---|---|---|
@@ -76,7 +76,7 @@ Pourquoi trois couches :
 
 Le modèle est une **constellation de faits** : deux tables de faits qui partagent les mêmes dimensions.
 
-![Schéma Gold](Christopher/MLD%20-%20Conception/schema-gold.jpg)
+![Schéma Gold](Christopher/MLD%20-%20Conception/schema-gold-constellation.jpg)
 
 - **Faits :** `fait_consultation` et `fait_hospitalisation`.
 - **Dimensions :** `dim_temps`, `dim_patient` (pseudonymisé, sans nom ni adresse), `dim_diagnostic`, `dim_professionnel`, `dim_etablissement`.
