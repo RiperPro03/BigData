@@ -45,6 +45,8 @@ L'accès aux données au sein de la plateforme Lakehouse est régi par le princi
 - Opérateurs :
     - Accès restreint (lecture) aux rapports Power BI.
 
+![alt text](image.png)
+
 ## Traçabilité des flux
 
 Pour garantir la transparence, la conformité réglementaire et l'intégrité des analyses présentées au groupe CHU, la traçabilité est assurée de bout en bout selon deux axes majeurs :
