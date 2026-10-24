@@ -299,6 +299,8 @@ R = lecture, RW = lecture et écriture, – = aucun accès.
 | Opérateur | – | – | – | R, rapports opérationnels agrégés | – |
 | RSSI et DPO | – | – | – | – | R, audit sur demande |
 
+![alt text](image.png)
+
 Les écritures en production passent par des comptes de service des pipelines, non par des comptes humains. Les data engineers travaillent en écriture dans les environnements de développement et de test, et ne modifient la production que par déploiement du code.
 
 ### 7.2 Sécurité fine dans les outils
