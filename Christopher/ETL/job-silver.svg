@@ -1,0 +1,152 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg viewBox="0 0 960 640" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="silver-title silver-desc" id="job-silver-root"><title id="silver-title">Job Silver : conception</title><desc id="silver-desc">Cinq process lisent les dossiers Bronze, corrigent les types, pseudonymisent et dédoublonnent, puis écrivent dans les dossiers Silver ; les lignes invalides vont dans les dossiers de rejets avec leur motif.</desc><defs>
+      <style>#job-silver-root { --color-paper:#f5f5f5; --color-ink:#2d3142; --color-muted:#4f5d75; --color-accent:#bf4520;
+  --font-sans:'Geist', system-ui, sans-serif; --font-serif:'Instrument Serif','Noto Serif',serif; --font-mono:'Geist Mono', ui-monospace, monospace; }
+      #job-silver-root { font-family: var(--font-sans); color: var(--color-ink); }
+      #job-silver-root .diagram-container { width:100%; overflow-x:auto; }
+      #job-silver-root .sub { font-size:14px; color:var(--color-muted); margin-bottom:1.5rem; }
+      #job-silver-root .diagram-container > svg { width:100%; min-width:1076px; display:block; }
+      #job-silver-root text { font-family:var(--font-sans); fill:var(--color-ink); }
+      #job-silver-root .tt { font-size:16px; font-weight:700; }
+      #job-silver-root .nn { font-size:12px; font-weight:600; }
+      #job-silver-root .sl { font-size:11px; }
+      #job-silver-root .sv { font-size:11px; }
+      #job-silver-root .eb { font-size:9px; font-weight:500; letter-spacing:.18em; }
+      #job-silver-root .al { font-size:10px; letter-spacing:.08em; font-weight:500; }
+      #job-silver-root text.sl, #job-silver-root text.sv, #job-silver-root text.eb, #job-silver-root text.al { font-family:var(--font-mono); }
+      #job-silver-root .m-tt { font-size:16px; font-weight:700; }
+      #job-silver-root .m-nn { font-size:12px; font-weight:600; }
+      #job-silver-root .m-sl, #job-silver-root .m-sv { font-size:11px; }
+      #job-silver-root .m-eb { font-size:9px; font-weight:500; letter-spacing:.18em; }
+      #job-silver-root .m-al { font-size:10px; letter-spacing:.08em; font-weight:500; }
+      #job-silver-root text.m-sl, #job-silver-root text.m-sv, #job-silver-root text.m-eb, #job-silver-root text.m-al { font-family:var(--font-mono); }
+      #job-silver-root h2.sec { font-family:var(--font-serif); font-size:1.5rem; font-weight:400; letter-spacing:-.02em; margin:2.5rem 0 .4rem; }
+      #job-silver-root h3.sub3 { font-size:15px; font-weight:600; margin:1.75rem 0 .5rem; }
+      #job-silver-root table.spec { width:100%; border-collapse:collapse; font-size:12.5px; background:#fff; border:1px solid rgba(45,49,66,.12); }
+      #job-silver-root table.spec th { text-align:left; font-family:var(--font-mono); font-size:.62rem; letter-spacing:.12em; text-transform:uppercase; color:var(--color-muted); padding:9px 10px; font-weight:500; background:#fafafa; }
+      #job-silver-root table.spec td { padding:8px 10px; border-top:1px solid rgba(45,49,66,.12); color:var(--color-muted); vertical-align:top; line-height:1.5; }
+      #job-silver-root table.spec td:first-child { color:var(--color-ink); font-weight:600; white-space:nowrap; }
+      #job-silver-root table.spec td code { font-family:var(--font-mono); font-size:11.5px; color:var(--color-ink); }
+      #job-silver-root .note { font-size:13px; color:var(--color-muted); line-height:1.55; margin-top:.75rem; }
+      #job-silver-root ul.spec { margin:.25rem 0 0 1.1rem; font-size:13px; line-height:1.6; color:var(--color-muted); }
+      #job-silver-root ul.spec li { margin-bottom:.35rem; }
+      #job-silver-root .card.focal { border-color:var(--color-accent); }
+      @media print {
+#job-silver-root .diagram-container { overflow-x:visible; }
+      #job-silver-root .diagram-container > svg { min-width:0; }
+}
+      #job-silver-root p.jobcap { font-family:var(--font-mono); font-size:.66rem; letter-spacing:.12em; color:var(--color-muted); margin:1.5rem 0 .4rem; }</style><marker id="job-silver-sv-arrow" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><polygon points="0 0, 8 3, 0 6" fill="#4f5d75"/></marker></defs>
+<rect width="100%" height="100%" fill="#f5f5f5"/>
+<text x="104" y="40" text-anchor="middle" class="eb" style="fill:#4f5d75">BRONZE</text>
+<text x="424" y="40" text-anchor="middle" class="eb" style="fill:#4f5d75">JOB SILVER · 5 PROCESS</text>
+<text x="800" y="40" text-anchor="middle" class="eb" style="fill:#4f5d75">SILVER ET REJETS</text>
+<line x1="184" y1="108" x2="224" y2="108" stroke="#4f5d75" stroke-width="1" marker-end="url(#job-silver-sv-arrow)"/>
+<line x1="624" y1="84" x2="664" y2="84" stroke="#4f5d75" stroke-width="1" marker-end="url(#job-silver-sv-arrow)"/>
+<line x1="624" y1="132" x2="664" y2="132" stroke="#4f5d75" stroke-width="1" stroke-dasharray="4,3" marker-end="url(#job-silver-sv-arrow)"/>
+<line x1="184" y1="212" x2="224" y2="212" stroke="#4f5d75" stroke-width="1" marker-end="url(#job-silver-sv-arrow)"/>
+<line x1="624" y1="188" x2="664" y2="188" stroke="#4f5d75" stroke-width="1" marker-end="url(#job-silver-sv-arrow)"/>
+<line x1="624" y1="236" x2="664" y2="236" stroke="#4f5d75" stroke-width="1" stroke-dasharray="4,3" marker-end="url(#job-silver-sv-arrow)"/>
+<line x1="184" y1="316" x2="224" y2="316" stroke="#4f5d75" stroke-width="1" marker-end="url(#job-silver-sv-arrow)"/>
+<line x1="624" y1="292" x2="664" y2="292" stroke="#4f5d75" stroke-width="1" marker-end="url(#job-silver-sv-arrow)"/>
+<line x1="624" y1="340" x2="664" y2="340" stroke="#4f5d75" stroke-width="1" stroke-dasharray="4,3" marker-end="url(#job-silver-sv-arrow)"/>
+<line x1="184" y1="420" x2="224" y2="420" stroke="#4f5d75" stroke-width="1" marker-end="url(#job-silver-sv-arrow)"/>
+<line x1="624" y1="396" x2="664" y2="396" stroke="#4f5d75" stroke-width="1" marker-end="url(#job-silver-sv-arrow)"/>
+<line x1="624" y1="444" x2="664" y2="444" stroke="#4f5d75" stroke-width="1" stroke-dasharray="4,3" marker-end="url(#job-silver-sv-arrow)"/>
+<line x1="184" y1="524" x2="224" y2="524" stroke="#4f5d75" stroke-width="1" marker-end="url(#job-silver-sv-arrow)"/>
+<line x1="624" y1="500" x2="664" y2="500" stroke="#4f5d75" stroke-width="1" marker-end="url(#job-silver-sv-arrow)"/>
+<line x1="624" y1="548" x2="664" y2="548" stroke="#4f5d75" stroke-width="1" stroke-dasharray="4,3" marker-end="url(#job-silver-sv-arrow)"/>
+<rect x="24" y="64" width="160" height="88" rx="6" fill="#2d3142" stroke="#4f5d75" stroke-width="1" fill-opacity="0.05"/>
+<text x="104" y="104" text-anchor="middle" class="sv" style="fill:#2d3142;font-weight:600">/bronze/postgres</text>
+<text x="104" y="122" text-anchor="middle" class="sl" style="fill:#4f5d75">5 fichiers</text>
+<rect x="224" y="64" width="400" height="88" rx="6" fill="#ffffff" stroke="#2d3142" stroke-width="1"/>
+<rect x="232" y="72" width="28" height="12" rx="2" fill="none" stroke="#2d3142" stroke-width="0.8"/>
+<text x="246" y="81" text-anchor="middle" class="eb" style="fill:#2d3142">S1</text>
+<text x="268" y="82" class="nn" style="fill:#2d3142">PostgreSQL</text>
+<text x="614" y="82" text-anchor="end" class="sl" style="fill:#4f5d75">5 tables</text>
+<text x="236" y="104" class="sl" style="fill:#4f5d75">types · sexe M/F · Id_patient pseudonymisé · ADELI 9 car.</text>
+<text x="236" y="121" class="sl" style="fill:#4f5d75">nulls : spécialité absente → « inconnu »</text>
+<text x="236" y="138" class="sl" style="fill:#4f5d75">doublons : Num_consultation unique, 1re ligne gardée</text>
+<rect x="664" y="64" width="272" height="40" rx="6" fill="#2d3142" stroke="#4f5d75" stroke-width="1" fill-opacity="0.05"/>
+<text x="800" y="81" text-anchor="middle" class="sv" style="fill:#2d3142;font-weight:600">/silver/postgres</text>
+<text x="800" y="95" text-anchor="middle" class="sl" style="fill:#4f5d75">5 fichiers typés</text>
+<rect x="664" y="112" width="272" height="40" rx="6" fill="#2d3142" stroke="#2d3142" stroke-width="1" stroke-dasharray="4,3" fill-opacity="0.02" stroke-opacity="0.30"/>
+<text x="800" y="129" text-anchor="middle" class="sv" style="fill:#2d3142;font-weight:600">/rejets/S1/&lt;date></text>
+<text x="800" y="143" text-anchor="middle" class="sl" style="fill:#4f5d75">clé orpheline · date invalide · doublon</text>
+<rect x="24" y="168" width="160" height="88" rx="6" fill="#2d3142" stroke="#4f5d75" stroke-width="1" fill-opacity="0.05"/>
+<text x="104" y="208" text-anchor="middle" class="sv" style="fill:#2d3142;font-weight:600">/bronze/csv_sante</text>
+<text x="104" y="226" text-anchor="middle" class="sl" style="fill:#4f5d75">3 fichiers</text>
+<rect x="224" y="168" width="400" height="88" rx="6" fill="#ffffff" stroke="#2d3142" stroke-width="1"/>
+<rect x="232" y="176" width="28" height="12" rx="2" fill="none" stroke="#2d3142" stroke-width="0.8"/>
+<text x="246" y="185" text-anchor="middle" class="eb" style="fill:#2d3142">S2</text>
+<text x="268" y="186" class="nn" style="fill:#2d3142">CSV santé</text>
+<text x="614" y="186" text-anchor="end" class="sl" style="fill:#4f5d75">3 fichiers</text>
+<text x="236" y="208" class="sl" style="fill:#4f5d75">dates typées · Id_patient pseudonymisé · ids en texte</text>
+<text x="236" y="225" class="sl" style="fill:#4f5d75">nulls : organisation vide → « inconnu »</text>
+<text x="236" y="242" class="sl" style="fill:#4f5d75">doublons : 300 paires professionnel-établissement, 1 gardée</text>
+<rect x="664" y="168" width="272" height="40" rx="6" fill="#2d3142" stroke="#4f5d75" stroke-width="1" fill-opacity="0.05"/>
+<text x="800" y="185" text-anchor="middle" class="sv" style="fill:#2d3142;font-weight:600">/silver/csv_sante</text>
+<text x="800" y="199" text-anchor="middle" class="sl" style="fill:#4f5d75">3 fichiers typés</text>
+<rect x="664" y="216" width="272" height="40" rx="6" fill="#2d3142" stroke="#2d3142" stroke-width="1" stroke-dasharray="4,3" fill-opacity="0.02" stroke-opacity="0.30"/>
+<text x="800" y="233" text-anchor="middle" class="sv" style="fill:#2d3142;font-weight:600">/rejets/S2/&lt;date></text>
+<text x="800" y="247" text-anchor="middle" class="sl" style="fill:#4f5d75">référence absente · date · doublon</text>
+<rect x="24" y="272" width="160" height="88" rx="6" fill="#2d3142" stroke="#4f5d75" stroke-width="1" fill-opacity="0.05"/>
+<text x="104" y="312" text-anchor="middle" class="sv" style="fill:#2d3142;font-weight:600">/bronze/satisfaction</text>
+<text x="104" y="330" text-anchor="middle" class="sl" style="fill:#4f5d75">3 fichiers</text>
+<rect x="224" y="272" width="400" height="88" rx="6" fill="#ffffff" stroke="#2d3142" stroke-width="1"/>
+<rect x="232" y="280" width="28" height="12" rx="2" fill="none" stroke="#2d3142" stroke-width="0.8"/>
+<text x="246" y="289" text-anchor="middle" class="eb" style="fill:#2d3142">S3</text>
+<text x="268" y="290" class="nn" style="fill:#2d3142">Satisfaction</text>
+<text x="614" y="290" text-anchor="end" class="sl" style="fill:#4f5d75">CSV 2017 et 2019 · xlsx 2020</text>
+<text x="236" y="312" class="sl" style="fill:#4f5d75">cp1252 → UTF-8 · région normalisée · 3 années unies</text>
+<text x="236" y="329" class="sl" style="fill:#4f5d75">nulls : score vide → NULL, jamais 0</text>
+<text x="236" y="346" class="sl" style="fill:#4f5d75">doublons : une ligne par site et par année</text>
+<rect x="664" y="272" width="272" height="40" rx="6" fill="#2d3142" stroke="#4f5d75" stroke-width="1" fill-opacity="0.05"/>
+<text x="800" y="289" text-anchor="middle" class="sv" style="fill:#2d3142;font-weight:600">/silver/satisfaction</text>
+<text x="800" y="303" text-anchor="middle" class="sl" style="fill:#4f5d75">1 jeu, 3 années</text>
+<rect x="664" y="320" width="272" height="40" rx="6" fill="#2d3142" stroke="#2d3142" stroke-width="1" stroke-dasharray="4,3" fill-opacity="0.02" stroke-opacity="0.30"/>
+<text x="800" y="337" text-anchor="middle" class="sv" style="fill:#2d3142;font-weight:600">/rejets/S3/&lt;date></text>
+<text x="800" y="351" text-anchor="middle" class="sl" style="fill:#4f5d75">finess_geo vide · doublon</text>
+<rect x="24" y="376" width="160" height="88" rx="6" fill="#2d3142" stroke="#4f5d75" stroke-width="1" fill-opacity="0.05"/>
+<text x="104" y="416" text-anchor="middle" class="sv" style="fill:#2d3142;font-weight:600">/bronze/deces</text>
+<text x="104" y="434" text-anchor="middle" class="sl" style="fill:#4f5d75">1 fichier · 1,9 Go</text>
+<rect x="224" y="376" width="400" height="88" rx="6" fill="#bf4520" stroke="#bf4520" stroke-width="1.4" fill-opacity="0.08"/>
+<rect x="232" y="384" width="28" height="12" rx="2" fill="none" stroke="#bf4520" stroke-width="0.8"/>
+<text x="246" y="393" text-anchor="middle" class="eb" style="fill:#bf4520">S4</text>
+<text x="268" y="394" class="nn" style="fill:#bf4520">Décès</text>
+<text x="614" y="394" text-anchor="end" class="sl" style="fill:#4f5d75">25 M lignes · traité en flux</text>
+<text x="236" y="416" class="sl" style="fill:#4f5d75">dates typées · sexe M/F · département déduit · clés générées</text>
+<text x="236" y="433" class="sl" style="fill:#4f5d75">nulls : naissance mal formée → NULL, ligne conservée</text>
+<text x="236" y="450" class="sl" style="fill:#4f5d75">doublons : lignes strictement identiques supprimées</text>
+<rect x="664" y="376" width="272" height="40" rx="6" fill="#2d3142" stroke="#4f5d75" stroke-width="1" fill-opacity="0.05"/>
+<text x="800" y="393" text-anchor="middle" class="sv" style="fill:#2d3142;font-weight:600">/silver/deces</text>
+<text x="800" y="407" text-anchor="middle" class="sl" style="fill:#4f5d75">1 fichier typé</text>
+<rect x="664" y="424" width="272" height="40" rx="6" fill="#2d3142" stroke="#2d3142" stroke-width="1" stroke-dasharray="4,3" fill-opacity="0.02" stroke-opacity="0.30"/>
+<text x="800" y="441" text-anchor="middle" class="sv" style="fill:#2d3142;font-weight:600">/rejets/S4/&lt;date></text>
+<text x="800" y="455" text-anchor="middle" class="sl" style="fill:#4f5d75">décès mal formé · naissance > décès</text>
+<rect x="24" y="480" width="160" height="88" rx="6" fill="#2d3142" stroke="#4f5d75" stroke-width="1" fill-opacity="0.05"/>
+<text x="104" y="520" text-anchor="middle" class="sv" style="fill:#2d3142;font-weight:600">/bronze/code_postaux</text>
+<text x="104" y="538" text-anchor="middle" class="sl" style="fill:#4f5d75">1 fichier</text>
+<rect x="224" y="480" width="400" height="88" rx="6" fill="#ffffff" stroke="#2d3142" stroke-width="1"/>
+<rect x="232" y="488" width="28" height="12" rx="2" fill="none" stroke="#2d3142" stroke-width="0.8"/>
+<text x="246" y="497" text-anchor="middle" class="eb" style="fill:#2d3142">S5</text>
+<text x="268" y="498" class="nn" style="fill:#2d3142">Codes postaux</text>
+<text x="614" y="498" text-anchor="end" class="sl" style="fill:#4f5d75">1 fichier · 39 192 lignes</text>
+<text x="236" y="520" class="sl" style="fill:#4f5d75">cp1252 → UTF-8 · une ligne par code commune</text>
+<text x="236" y="537" class="sl" style="fill:#4f5d75">nulls : Ligne_5 (vide à 88 %) non reprise</text>
+<text x="236" y="554" class="sl" style="fill:#4f5d75">doublons : plusieurs codes postaux par commune, 1 gardé</text>
+<rect x="664" y="480" width="272" height="40" rx="6" fill="#2d3142" stroke="#4f5d75" stroke-width="1" fill-opacity="0.05"/>
+<text x="800" y="497" text-anchor="middle" class="sv" style="fill:#2d3142;font-weight:600">/silver/code_postaux</text>
+<text x="800" y="511" text-anchor="middle" class="sl" style="fill:#4f5d75">1 fichier</text>
+<rect x="664" y="528" width="272" height="40" rx="6" fill="#2d3142" stroke="#2d3142" stroke-width="1" stroke-dasharray="4,3" fill-opacity="0.02" stroke-opacity="0.30"/>
+<text x="800" y="545" text-anchor="middle" class="sv" style="fill:#2d3142;font-weight:600">/rejets/S5/&lt;date></text>
+<text x="800" y="559" text-anchor="middle" class="sl" style="fill:#4f5d75">codes postaux en trop</text>
+<line x1="24" y1="596" x2="936" y2="596" stroke="#2d3142" stroke-width="0.8" stroke-opacity="0.10"/>
+<text x="24" y="616" class="eb" style="fill:#4f5d75">LÉGENDE</text>
+<rect x="104" y="605" width="22" height="14" rx="3" fill="#2d3142" stroke="#4f5d75" stroke-width="1" fill-opacity="0.05"/>
+<text x="136" y="616" class="sl" style="fill:#2d3142;font-family:var(--font-sans)">Dossier HDFS</text>
+<rect x="244" y="605" width="22" height="14" rx="3" fill="#ffffff" stroke="#2d3142" stroke-width="1"/>
+<text x="276" y="616" class="sl" style="fill:#2d3142;font-family:var(--font-sans)">Process de transformation</text>
+<rect x="444" y="605" width="22" height="14" rx="3" fill="#bf4520" stroke="#bf4520" stroke-width="1" fill-opacity="0.08"/>
+<text x="476" y="616" class="sl" style="fill:#2d3142;font-family:var(--font-sans)">Process focal : 25 M de lignes</text>
+<rect x="684" y="605" width="22" height="14" rx="3" fill="#2d3142" stroke="#2d3142" stroke-width="1" stroke-dasharray="4,3" fill-opacity="0.02" stroke-opacity="0.30"/>
+<text x="716" y="616" class="sl" style="fill:#2d3142;font-family:var(--font-sans)">Rejets, avec leur motif</text></svg>

@@ -1,45 +1,45 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<svg viewBox="0 0 1240 836" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="schema-gold-title schema-gold-desc" id="schema-gold-constellation-root">
+<svg viewBox="0 0 1240 836" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="schema-gold-title schema-gold-desc" id="schema-gold-constellation-only-root">
 <title id="schema-gold-title">Schéma Gold : faits et dimensions</title>
 <desc id="schema-gold-desc">Deux tables de faits, consultations et hospitalisations, reliées aux dimensions temps, patient, diagnostic et établissement ; les consultations atteignent l'établissement par le professionnel et un pont.</desc>
 <defs>
       <style>@import url('https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&amp;family=Geist:wght@400;500;600&amp;family=Geist+Mono:wght@400;500;600&amp;family=Noto+Serif:ital@0;1&amp;family=Noto+Sans+KR:wght@400;500;600&amp;family=Noto+Serif+KR:wght@400&amp;family=Noto+Sans+TC:wght@400;500;600&amp;family=Noto+Serif+TC:wght@400&amp;display=swap');
-      #schema-gold-constellation-root { --color-paper:#f5f5f5; --color-ink:#2d3142; --color-muted:#4f5d75;
+      #schema-gold-constellation-only-root { --color-paper:#f5f5f5; --color-ink:#2d3142; --color-muted:#4f5d75;
   --font-sans:'Geist', system-ui, sans-serif; --font-serif:'Instrument Serif','Noto Serif',serif; --font-mono:'Geist Mono', ui-monospace, monospace; }
-      #schema-gold-constellation-root { font-family: var(--font-sans); color: var(--color-ink); }
-      #schema-gold-constellation-root .diagram-container { width:100%; overflow-x:auto; }
-      #schema-gold-constellation-root h2.sec { font-family:var(--font-serif); font-size:1.5rem; font-weight:400; letter-spacing:-.02em; margin:2.5rem 0 .4rem; }
-      #schema-gold-constellation-root .sub { font-size:14px; color:var(--color-muted); margin-bottom:1.25rem; line-height:1.5; }
-      #schema-gold-constellation-root text { font-family:var(--font-sans); fill:var(--color-ink); }
-      #schema-gold-constellation-root .tn { font-size:12px; font-weight:600; }
-      #schema-gold-constellation-root .cn { font-size:12px; font-weight:500; }
-      #schema-gold-constellation-root .ct { font-size:10px; font-family:var(--font-mono); }
-      #schema-gold-constellation-root .eb { font-size:9px; font-weight:500; letter-spacing:.12em; font-family:var(--font-mono); }
-      #schema-gold-constellation-root table { width:100%; border-collapse:collapse; font-size:13px; background:#fff; border:1px solid rgba(45,49,66,.12); border-radius:6px; }
-      #schema-gold-constellation-root th { text-align:left; font-family:var(--font-mono); font-size:.66rem; letter-spacing:.14em; text-transform:uppercase; color:var(--color-muted); padding:10px 12px; font-weight:500; }
-      #schema-gold-constellation-root td { padding:8px 12px; border-top:1px solid rgba(45,49,66,.12); color:var(--color-muted); vertical-align:top; }
-      #schema-gold-constellation-root td:first-child { color:var(--color-ink); font-weight:500; width:34%; }
-      #schema-gold-constellation-root .note { font-size:13px; color:var(--color-muted); line-height:1.55; margin-top:1rem; }
+      #schema-gold-constellation-only-root { font-family: var(--font-sans); color: var(--color-ink); }
+      #schema-gold-constellation-only-root .diagram-container { width:100%; overflow-x:auto; }
+      #schema-gold-constellation-only-root h2.sec { font-family:var(--font-serif); font-size:1.5rem; font-weight:400; letter-spacing:-.02em; margin:2.5rem 0 .4rem; }
+      #schema-gold-constellation-only-root .sub { font-size:14px; color:var(--color-muted); margin-bottom:1.25rem; line-height:1.5; }
+      #schema-gold-constellation-only-root text { font-family:var(--font-sans); fill:var(--color-ink); }
+      #schema-gold-constellation-only-root .tn { font-size:12px; font-weight:600; }
+      #schema-gold-constellation-only-root .cn { font-size:12px; font-weight:500; }
+      #schema-gold-constellation-only-root .ct { font-size:10px; font-family:var(--font-mono); }
+      #schema-gold-constellation-only-root .eb { font-size:9px; font-weight:500; letter-spacing:.12em; font-family:var(--font-mono); }
+      #schema-gold-constellation-only-root table { width:100%; border-collapse:collapse; font-size:13px; background:#fff; border:1px solid rgba(45,49,66,.12); border-radius:6px; }
+      #schema-gold-constellation-only-root th { text-align:left; font-family:var(--font-mono); font-size:.66rem; letter-spacing:.14em; text-transform:uppercase; color:var(--color-muted); padding:10px 12px; font-weight:500; }
+      #schema-gold-constellation-only-root td { padding:8px 12px; border-top:1px solid rgba(45,49,66,.12); color:var(--color-muted); vertical-align:top; }
+      #schema-gold-constellation-only-root td:first-child { color:var(--color-ink); font-weight:500; width:34%; }
+      #schema-gold-constellation-only-root .note { font-size:13px; color:var(--color-muted); line-height:1.55; margin-top:1rem; }
       @media print {
-#schema-gold-constellation-root .diagram-container { overflow-x:visible; }
+#schema-gold-constellation-only-root .diagram-container { overflow-x:visible; }
 }</style>
-<marker id="schema-gold-constellation-arrow" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><polygon points="0 0, 8 3, 0 6" fill="#4f5d75"/></marker>
-<marker id="schema-gold-constellation-arrow-accent" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><polygon points="0 0, 8 3, 0 6" fill="#bf4520"/></marker>
-<marker id="schema-gold-constellation-arrow-link" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><polygon points="0 0, 8 3, 0 6" fill="#2e5aa8"/></marker>
+<marker id="schema-gold-constellation-only-arrow" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><polygon points="0 0, 8 3, 0 6" fill="#4f5d75"/></marker>
+<marker id="schema-gold-constellation-only-arrow-accent" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><polygon points="0 0, 8 3, 0 6" fill="#bf4520"/></marker>
+<marker id="schema-gold-constellation-only-arrow-link" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><polygon points="0 0, 8 3, 0 6" fill="#2e5aa8"/></marker>
 </defs>
 <rect width="100%" height="100%" fill="#f5f5f5"/>
 <rect x="12" y="12" width="1216" height="816" rx="8" fill="#2d3142" fill-opacity="0.02" stroke="#2d3142" stroke-opacity="0.2" stroke-dasharray="4,4"/>
 <text x="26" y="30" class="eb" fill="#4f5d75">BASE HIVE · gold</text>
-<path d="M274 124 L322.0 124.0 Q330 124 330.0 116.0 L330.0 108.0 Q330 100 338.0 100.0 L495 100" fill="none" stroke="#4f5d75" stroke-width="1.2" marker-end="url(#schema-gold-constellation-arrow)"/>
-<path d="M274 148 L392.0 148.0 Q400 148 400.0 156.0 L400.0 320.0 Q400 328 408.0 328.0 L495 328" fill="none" stroke="#4f5d75" stroke-width="1.2" marker-end="url(#schema-gold-constellation-arrow)"/>
-<path d="M274 172 L362.0 172.0 Q370 172 370.0 180.0 L370.0 476.0 Q370 484 378.0 484.0 L495 484" fill="none" stroke="#4f5d75" stroke-width="1.2" marker-end="url(#schema-gold-constellation-arrow)"/>
-<path d="M274 196 L292.0 196.0 Q300 196 300.0 204.0 L300.0 334.0 Q300 342 292.0 342.0 L274 342" fill="none" stroke="#4f5d75" stroke-width="1.2" marker-end="url(#schema-gold-constellation-arrow)"/>
-<path d="M274 528 L304.0 528.0 Q312 528 312.0 520.0 L312.0 362.0 Q312 354 304.0 354.0 L274 354" fill="none" stroke="#4f5d75" stroke-width="1.2" marker-end="url(#schema-gold-constellation-arrow)"/>
-<path d="M274 552 L432.0 552.0 Q440 552 440.0 560.0 L440.0 608.0 Q440 616 448.0 616.0 L495 616" fill="none" stroke="#4f5d75" stroke-width="1.2" marker-end="url(#schema-gold-constellation-arrow)"/>
-<path d="M966 124 L808.0 124.0 Q800 124 800.0 116.0 L800.0 108.0 Q800 100 792.0 100.0 L745 100" fill="none" stroke="#4f5d75" stroke-width="1.2" marker-end="url(#schema-gold-constellation-arrow)"/>
-<path d="M966 148 L838.0 148.0 Q830 148 830.0 156.0 L830.0 320.0 Q830 328 822.0 328.0 L745 328" fill="none" stroke="#4f5d75" stroke-width="1.2" marker-end="url(#schema-gold-constellation-arrow)"/>
-<path d="M966 172 L868.0 172.0 Q860 172 860.0 180.0 L860.0 476.0 Q860 484 852.0 484.0 L745 484" fill="none" stroke="#4f5d75" stroke-width="1.2" marker-end="url(#schema-gold-constellation-arrow)"/>
-<path d="M966 196 L898.0 196.0 Q890 196 890.0 204.0 L890.0 608.0 Q890 616 882.0 616.0 L745 616" fill="none" stroke="#4f5d75" stroke-width="1.2" marker-end="url(#schema-gold-constellation-arrow)"/>
+<path d="M274 124 L322.0 124.0 Q330 124 330.0 116.0 L330.0 108.0 Q330 100 338.0 100.0 L495 100" fill="none" stroke="#4f5d75" stroke-width="1.2" marker-end="url(#schema-gold-constellation-only-arrow)"/>
+<path d="M274 148 L392.0 148.0 Q400 148 400.0 156.0 L400.0 320.0 Q400 328 408.0 328.0 L495 328" fill="none" stroke="#4f5d75" stroke-width="1.2" marker-end="url(#schema-gold-constellation-only-arrow)"/>
+<path d="M274 172 L362.0 172.0 Q370 172 370.0 180.0 L370.0 476.0 Q370 484 378.0 484.0 L495 484" fill="none" stroke="#4f5d75" stroke-width="1.2" marker-end="url(#schema-gold-constellation-only-arrow)"/>
+<path d="M274 196 L292.0 196.0 Q300 196 300.0 204.0 L300.0 334.0 Q300 342 292.0 342.0 L274 342" fill="none" stroke="#4f5d75" stroke-width="1.2" marker-end="url(#schema-gold-constellation-only-arrow)"/>
+<path d="M274 528 L304.0 528.0 Q312 528 312.0 520.0 L312.0 362.0 Q312 354 304.0 354.0 L274 354" fill="none" stroke="#4f5d75" stroke-width="1.2" marker-end="url(#schema-gold-constellation-only-arrow)"/>
+<path d="M274 552 L432.0 552.0 Q440 552 440.0 560.0 L440.0 608.0 Q440 616 448.0 616.0 L495 616" fill="none" stroke="#4f5d75" stroke-width="1.2" marker-end="url(#schema-gold-constellation-only-arrow)"/>
+<path d="M966 124 L808.0 124.0 Q800 124 800.0 116.0 L800.0 108.0 Q800 100 792.0 100.0 L745 100" fill="none" stroke="#4f5d75" stroke-width="1.2" marker-end="url(#schema-gold-constellation-only-arrow)"/>
+<path d="M966 148 L838.0 148.0 Q830 148 830.0 156.0 L830.0 320.0 Q830 328 822.0 328.0 L745 328" fill="none" stroke="#4f5d75" stroke-width="1.2" marker-end="url(#schema-gold-constellation-only-arrow)"/>
+<path d="M966 172 L868.0 172.0 Q860 172 860.0 180.0 L860.0 476.0 Q860 484 852.0 484.0 L745 484" fill="none" stroke="#4f5d75" stroke-width="1.2" marker-end="url(#schema-gold-constellation-only-arrow)"/>
+<path d="M966 196 L898.0 196.0 Q890 196 890.0 204.0 L890.0 608.0 Q890 616 882.0 616.0 L745 616" fill="none" stroke="#4f5d75" stroke-width="1.2" marker-end="url(#schema-gold-constellation-only-arrow)"/>
 <rect x="24" y="52" width="250" height="156" rx="6" fill="#f5f5f5"/>
 <rect x="24" y="52" width="250" height="156" rx="6" fill="#ffffff"/>
 <rect x="24" y="52" width="250" height="156" rx="6" fill="#bf4520" fill-opacity="0.04"/>
@@ -226,7 +226,7 @@
 <text x="56" y="813" class="eb" fill="#4f5d75">CLÉ PRIMAIRE</text>
 <rect x="182" y="804" width="22" height="12" rx="2" fill="none" stroke="#2d3142" stroke-opacity="0.35" stroke-width="0.8"/><text x="193" y="813" class="eb" text-anchor="middle" fill="#2d3142">FK</text>
 <text x="212" y="813" class="eb" fill="#4f5d75">CLÉ ÉTRANGÈRE</text>
-<path d="M352 810 L384 810" stroke="#4f5d75" stroke-width="1.2" fill="none" marker-end="url(#schema-gold-constellation-arrow)"/>
+<path d="M352 810 L384 810" stroke="#4f5d75" stroke-width="1.2" fill="none" marker-end="url(#schema-gold-constellation-only-arrow)"/>
 <text x="392" y="813" class="eb" fill="#4f5d75">RÉFÉRENCE N:1 · CLÉ LOGIQUE, NON APPLIQUÉE PAR HIVE</text>
 <rect x="772" y="804" width="22" height="12" rx="2" fill="#bf4520" fill-opacity="0.16" stroke="#bf4520"/>
 <text x="802" y="813" class="eb" fill="#4f5d75">TABLE DE FAITS</text>
