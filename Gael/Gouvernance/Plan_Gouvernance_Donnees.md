@@ -285,20 +285,6 @@ Les droits suivent le principe du moindre privilège : plus un profil est éloig
 
 ### 7.1 Matrice profil et couche
 
-R = lecture, RW = lecture et écriture, – = aucun accès.
-
-| Profil | Bronze | Silver | Gold | Power BI | Journaux d'audit |
-| --- | --- | --- | --- | --- | --- |
-| Administrateur plateforme | Infrastructure seulement, sans lecture du contenu | Idem | Idem | Administration technique | R, sans droit de modification |
-| Data engineer | Accès exceptionnel (R, durée limitée, validé par le data owner et le RSSI) | RW, colonnes sensibles masquées | RW | Publication des modèles | – |
-| Data steward | – | R, colonnes sensibles masquées | R | R | – |
-| Data scientist | – | R sur extraction pseudonymisée d'un projet validé par le comité | R | R | – |
-| Analyste de données | – | – | R | R | – |
-| Praticien | – | – | – | R, limité à son service ou à son périmètre | – |
-| Direction d'établissement | – | – | – | R, limité à son établissement ; direction du groupe : tous les établissements | – |
-| Opérateur | – | – | – | R, rapports opérationnels agrégés | – |
-| RSSI et DPO | – | – | – | – | R, audit sur demande |
-
 ![alt text](image.png)
 
 Les écritures en production passent par des comptes de service des pipelines, non par des comptes humains. Les data engineers travaillent en écriture dans les environnements de développement et de test, et ne modifient la production que par déploiement du code.
