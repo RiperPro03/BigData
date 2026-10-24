@@ -163,11 +163,11 @@
 <rect x="848" y="148" width="128" height="160" rx="6" fill="#bf4520" stroke="#bf4520" stroke-width="1.4" fill-opacity="0.08"/>
 <rect x="860" y="160" width="46" height="16" rx="2" fill="none" stroke="#bf4520" stroke-width="0.8"/>
 <text x="868" y="172" class="eb" text-anchor="start" fill="#bf4520">GOLD</text>
-<text x="860" y="202" class="nn" text-anchor="start">Modèle étoile</text>
+<text x="860" y="202" class="nn" text-anchor="start">Constellation</text>
 <text x="860" y="218" class="sl" text-anchor="start" fill="#bf4520">/gold</text>
-<text x="860" y="242" class="sl" text-anchor="start" fill="#5a6580">4 faits · 6 dim.</text>
-<text x="860" y="256" class="sl" text-anchor="start" fill="#5a6580">prêt pour la BI</text>
-<text x="860" y="270" class="sl" text-anchor="start" fill="#5a6580">lu par Power BI</text>
+<text x="860" y="242" class="sl" text-anchor="start" fill="#5a6580">4 faits · 10 dim.</text>
+<text x="860" y="256" class="sl" text-anchor="start" fill="#5a6580">modèle dimensionnel</text>
+<text x="860" y="270" class="sl" text-anchor="start" fill="#5a6580">exposé via Hive</text>
 </g>
 <rect x="584" y="356" width="128" height="64" rx="6" fill="#f5f5f5"/>
 <rect x="584" y="356" width="128" height="64" rx="6" fill="#2d3142" stroke="rgba(45,49,66,0.4)" stroke-width="1" stroke-dasharray="4,3" fill-opacity="0.02"/>
@@ -198,7 +198,7 @@
 <text x="36" y="544" class="sl" text-anchor="start" fill="#5a6580">RGPD · HDS · CNIL</text>
 <text x="36" y="560" class="sl" text-anchor="start" fill="#5a6580">fiche CNIL · nov. 2017</text>
 <text x="260" y="526" class="eb" text-anchor="start" fill="#2d3142">MINIMISER ET PSEUDONYMISER</text>
-<text x="260" y="546" class="sl" text-anchor="start" fill="#5a6580">noms et adresses exclus de Gold</text>
+<text x="260" y="546" class="sl" text-anchor="start" fill="#5a6580">patients sans nom ni adresse</text>
 <text x="260" y="561" class="sl" text-anchor="start" fill="#5a6580">pseudonymisation en Silver</text>
 <text x="260" y="576" class="sl" text-anchor="start" fill="#5a6580">clé de pseudonymisation hors cluster</text>
 <text x="260" y="591" class="sl" text-anchor="start" fill="#5a6580">finalité : indicateurs d’activité, mortalité</text>
