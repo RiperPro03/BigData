@@ -24,10 +24,6 @@ Hors périmètre : le système d'information de soins lui-même (il reste la sou
 - **Responsabilité démontrable** (art. 5.2 RGPD) : chaque règle est documentée, chaque décision est tracée et datée.
 - **Qualité et traçabilité** : un indicateur n'est publié que si sa définition est validée et sa provenance remontable jusqu'à la source.
 
-### 1.3 Hypothèse de travail pour le projet
-
-Les jeux fournis pour le projet sont traités comme s'ils contenaient des données de santé réelles : les mêmes règles s'appliquent. Les environnements de développement et de test n'utilisent que des données synthétiques (section 5.6).
-
 ## 2. Organisation et rôles
 
 La conformité repose sur des personnes identifiées, pas seulement sur des outils : chaque donnée a un propriétaire métier, chaque règle a un responsable, et un comité arbitre les désaccords.
@@ -233,7 +229,7 @@ Les personnes décédées ne sont pas protégées par le RGPD lui-même, mais la
 
 ### 5.6 Données de test synthétiques
 
-Les environnements de développement et de test utilisent des données générées à partir du schéma de la source 1 (bibliothèque Faker ou générateur équivalent), avec des distributions réalistes mais sans lien avec de vrais patients. Aucune copie, même partielle ou pseudonymisée, de la production n'y est autorisée.
+Les environnements de développement et de test utilisent des données générées à partir du schéma de la source 1, avec des distributions réalistes mais sans lien avec de vrais patients. Aucune copie, même partielle ou pseudonymisée, de la production n'y est autorisée.
 
 ## 6. Conformité HDS et sécurité
 
