@@ -69,10 +69,6 @@ R = réalise, A = rend compte et décide, C = consulté, I = informé.
 | Notifier la CNIL | A | R | C | I | I | I |
 | Revue trimestrielle des accès | I | C | A | R | I | R |
 
-### 2.4 Répartition au sein de l'équipe projet
-
-Pour la mise en œuvre pédagogique, les rôles se répartissent ainsi : un membre joue l'équipe plateforme (ETL, stockage, sécurité technique), un deuxième le data steward (modélisation, qualité, glossaire), un troisième le DPO et le RSSI (registre, AIPD, matrice d'accès, incidents). Chacun relit le travail des deux autres, ce qui reproduit la séparation des responsabilités attendue en production.
-
 ## 3. Classification des données et finalités
 
 Quatre niveaux de sensibilité déterminent où une donnée peut être stockée, qui peut la lire et comment elle est protégée. Chaque colonne du dictionnaire de données porte son niveau.
@@ -210,7 +206,7 @@ L'anonymisation d'un jeu au niveau individuel est très difficile à démontrer 
 | --- | --- | --- | --- |
 | 1. PostgreSQL | Nom, prénom, adresse, téléphone, numéro de sécurité sociale | Supprimés | Absents de Silver |
 | 1. PostgreSQL | Identifiant patient | HMAC-SHA256 avec clé du coffre | Silver |
-| 1. PostgreSQL | Date de naissance | Remplacée par l'année en Silver, puis par une tranche d'âge de 5 ans au moment de l'événement en Gold | Silver, Gold |
+| 1. PostgreSQL | Date de naissance | Remplacée par l'année en Silver | Silver, Gold |
 | 1. PostgreSQL | Code postal | Remplacé par le département et la région | Silver, Gold |
 | 1. PostgreSQL | Dates de séjour et de consultation | Conservées au jour (nécessaires aux périodes d'analyse), heure supprimée | Silver, Gold |
 | 1. PostgreSQL | Diagnostic (CIM-10) | Conservé | Silver, Gold |
@@ -483,6 +479,10 @@ Les huit risques ci-dessous orientent le plan d'action par phase du projet, et s
 
 ### 12.4 Références
 
-Textes cités : règlement (UE) 2016/679 (RGPD), articles 5, 6, 9, 11, 12 à 22, 25, 28, 30, 32 à 39 et 89 ; loi du 6 janvier 1978 (Informatique et Libertés) ; article L.1111-8 du Code de la santé publique (hébergement) ; référentiel de certification HDS ; PGSSI-S ; avis 05/2014 du G29 sur les techniques d'anonymisation ; référentiel CNIL sur les entrepôts de données de santé et méthodologies de référence (MR-004).
-
-Ces références sont citées de mémoire : les numéros d'articles, la version du référentiel HDS et les méthodologies CNIL applicables sont à vérifier sur les sites de la CNIL, de l'ANS et de Légifrance avant la remise du rapport.
+Textes cités :
+- [Règlement (UE) 2016/679 (RGPD)](https://www.cnil.fr/fr/reglement-europeen-protection-donnees), articles 5, 6, 9, 11, 12 à 22, 25, 28, 30, 32 à 39 et 89
+- Loi du 6 janvier 1978 (Informatique et Libertés) [Article L.1111-8 du Code de la santé publique (hébergement)](https://www.legifrance.gouv.fr/codes/article_lc/LEGIARTI000049577902)
+- [Référentiel de certification HDS](https://esante.gouv.fr/services/hebergeurs-de-donnees-de-sante/les-referentiels-de-la-procedure-de-certification)
+- [PGSSI-S](https://esante.gouv.fr/produits-services/pgssi-s)
+- [Avis 05/2014 du G29 sur les techniques d'anonymisation](https://ec.europa.eu/justice/article-29/documentation/opinion-recommendation/files/2014/wp216_fr.pdf)
+- [Référentiel CNIL sur les entrepôts de données de santé et méthodologies de référence (MR-004)](https://www.cnil.fr/fr/declaration/methodologie-de-reference-04-recherches-nimpliquant-pas-la-personne-humaine-etudes-et-evaluations-dans-le-domaine-de-la-sante).
