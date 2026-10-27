@@ -186,8 +186,6 @@ L'EDD pseudonymise à l'entrée de Silver et n'expose en Gold que des données s
 | Preuve | Mesures de séparation de la clé | Démonstration des trois critères de l'avis du G29 de 2014 : individualisation, corrélation, inférence |
 | Usage dans l'EDD | Silver et dimension Patient de Gold | Agrégats publiables sans petits effectifs |
 
-L'anonymisation d'un jeu au niveau individuel est très difficile à démontrer ; le projet ne prétend donc pas anonymiser les faits, il les pseudonymise et protège leur accès.
-
 ### 5.2 Technique retenue pour le patient
 
 - Le pseudonyme est calculé par un hachage à clé : HMAC-SHA256 de l'identifiant patient normalisé. Le même patient reçoit toujours le même pseudonyme, ce qui permet le suivi dans le temps sans connaître son identité.
