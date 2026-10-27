@@ -33,7 +33,7 @@ La conformité repose sur des personnes identifiées, pas seulement sur des outi
 | Rôle | Qui | Responsabilités principales |
 | --- | --- | --- |
 | Responsable de traitement | Le groupe CHU (direction générale) | Fixe les finalités et les moyens, valide l'AIPD, répond de la conformité devant la CNIL |
-| Délégué à la protection des données (DPO) | Désigné par le groupe (art. 37.1.a RGPD, organisme public) | Conseille, contrôle la conformité, donne son avis sur l'AIPD, point de contact des patients et de la CNIL ; reste indépendant |
+| Délégué à la protection des données (DPO) | Désigné (art. 37.1.a RGPD, organisme public) | Conseille, contrôle la conformité, donne son avis sur l'AIPD, point de contact des patients et de la CNIL ; reste indépendant |
 | RSSI | Responsable de la sécurité des systèmes d'information | Politique de sécurité, application de la PGSSI-S, pilotage des incidents, suivi de la certification HDS de l'hébergeur |
 | Data owner (source 1) | Département d'information médicale (DIM) | Décide de l'usage et de la définition des données de séjour, consultations et diagnostics |
 | Data owner (source 3) | Direction qualité / relations avec les usagers | Idem pour les notes de satisfaction |
