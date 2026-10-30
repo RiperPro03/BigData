@@ -32,6 +32,6 @@ CREATE TABLE fait_deces (
     deces_key INT,
     date_deces DATE,
     code_commune_deces STRING,
-    defunt_key INT
+    defunt_key INT,
     numero_acte_deces STRING
 );

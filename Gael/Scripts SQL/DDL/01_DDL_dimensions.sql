@@ -1,7 +1,7 @@
 -- CONSTELLATION
 
 CREATE TABLE dim_temps (
-    date DATE,
+    `date` DATE,
     annee SMALLINT,
     mois SMALLINT,
     jour SMALLINT
@@ -47,7 +47,7 @@ CREATE TABLE dim_region (
 
 -- DECES
 CREATE TABLE dim_temps_deces (
-    date DATE,
+    `date` DATE,
     annee SMALLINT,
     mois SMALLINT,
     jour SMALLINT
