@@ -1,24 +1,27 @@
+CREATE DATABASE IF NOT EXISTS gold;
+USE gold;
+
 -- CONSTELLATION
 
-CREATE TABLE dim_temps (
+CREATE TABLE IF NOT EXISTS dim_temps (
     `date` DATE,
     annee SMALLINT,
     mois SMALLINT,
     jour SMALLINT
 );
 
-CREATE TABLE dim_patient (
+CREATE TABLE IF NOT EXISTS dim_patient (
     id_patient INT,
     sexe STRING,
     age INT
 );
 
-CREATE TABLE dim_diagnostic (
+CREATE TABLE IF NOT EXISTS dim_diagnostic (
     code_diag STRING,
     libelle STRING
 );
 
-CREATE TABLE dim_etablissement (
+CREATE TABLE IF NOT EXISTS dim_etablissement (
     identifiant_organisation STRING,
     raison_sociale_site STRING,
     finess_site STRING,
@@ -28,7 +31,7 @@ CREATE TABLE dim_etablissement (
     code_postal STRING
 );
 
-CREATE TABLE dim_professionnel (
+CREATE TABLE IF NOT EXISTS dim_professionnel (
     id_prof_sante STRING,
     categorie STRING,
     profession STRING,
@@ -37,23 +40,23 @@ CREATE TABLE dim_professionnel (
 
 -- SATISFACTION
 
-CREATE TABLE dim_temps_satisfaction (
+CREATE TABLE IF NOT EXISTS dim_temps_satisfaction (
     annee SMALLINT
 );
 
-CREATE TABLE dim_region (
+CREATE TABLE IF NOT EXISTS dim_region (
     region STRING
 );
 
 -- DECES
-CREATE TABLE dim_temps_deces (
+CREATE TABLE IF NOT EXISTS dim_temps_deces (
     `date` DATE,
     annee SMALLINT,
     mois SMALLINT,
     jour SMALLINT
 );
 
-CREATE TABLE dim_defunt (
+CREATE TABLE IF NOT EXISTS dim_defunt (
     defunt_key INT,
     sexe STRING,
     date_naissance DATE,
@@ -62,7 +65,7 @@ CREATE TABLE dim_defunt (
     pays_naissance STRING
 );
 
-CREATE TABLE dim_lieu_deces (
+CREATE TABLE IF NOT EXISTS dim_lieu_deces (
     code_commune_insee STRING,
     nom_de_la_commune STRING,
     code_postal STRING,

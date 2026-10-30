@@ -1,6 +1,9 @@
+CREATE DATABASE IF NOT EXISTS gold;
+USE gold;
+
 -- CONSTELLATION
 
-CREATE TABLE fait_consultation (
+CREATE TABLE IF NOT EXISTS fait_consultation (
     num_consultation INT,
     date_consultation DATE,
     id_patient INT,
@@ -8,7 +11,7 @@ CREATE TABLE fait_consultation (
     id_prof_sante STRING
 );
 
-CREATE TABLE fait_hospitalisation (
+CREATE TABLE IF NOT EXISTS fait_hospitalisation (
     num_hospitalisation INT,
     date_entree DATE,
     id_patient INT,
@@ -18,7 +21,7 @@ CREATE TABLE fait_hospitalisation (
 
 -- SATISFACTION
 
-CREATE TABLE fait_satisfaction (
+CREATE TABLE IF NOT EXISTS fait_satisfaction (
     identifiant_organisation STRING,
     annee SMALLINT,
     region STRING,
@@ -28,7 +31,7 @@ CREATE TABLE fait_satisfaction (
 
 -- DECES
 
-CREATE TABLE fait_deces (
+CREATE TABLE IF NOT EXISTS fait_deces (
     deces_key INT,
     date_deces DATE,
     code_commune_deces STRING,
