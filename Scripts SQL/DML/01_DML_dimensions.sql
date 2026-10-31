@@ -1,1 +1,1 @@
-use gold;
+USE gold;
