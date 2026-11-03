@@ -65,10 +65,10 @@ FROM (
            hospitalisation.id_patient,
            hospitalisation.code_diag,
            hospitalisation.identifiant_organisation,
-           calendrier.`date`                   AS date_trouvee,
+           calendrier.`date` AS date_trouvee,
            -- accents grave sur "date" car c'est un mot réservé
-           patient.id_patient                  AS patient_trouve,
-           diagnostic.code_diag                AS diagnostic_trouve,
+           patient.id_patient AS patient_trouve,
+           diagnostic.code_diag AS diagnostic_trouve,
            etablissement.identifiant_organisation AS etablissement_trouve
     FROM silver.s2_hospitalisation hospitalisation
     LEFT JOIN dim_temps calendrier
@@ -114,7 +114,49 @@ WHERE controle_cles.num_hospitalisation IS NULL
 
 
 -- DECES
--- TODO fait_deces
+
+FROM (
+    SELECT deces.deces_key,
+           deces.date_deces,
+           deces.code_commune_deces,
+           deces.defunt_key,
+           deces.numero_acte_deces,
+           calendrier_deces.`date` AS date_trouvee,
+           lieu.code_commune_insee AS lieu_trouve
+    FROM silver.s4_deces deces
+    LEFT JOIN dim_temps_deces calendrier_deces
+           ON calendrier_deces.`date` = deces.date_deces
+    LEFT JOIN dim_lieu_deces lieu
+           ON lieu.code_commune_insee = deces.code_commune_deces
+) controle_cles
+
+INSERT OVERWRITE TABLE fait_deces
+SELECT controle_cles.deces_key,
+       controle_cles.date_deces,
+       controle_cles.code_commune_deces,
+       controle_cles.defunt_key,
+       controle_cles.numero_acte_deces
+WHERE controle_cles.deces_key IS NOT NULL
+  AND controle_cles.defunt_key IS NOT NULL
+  AND controle_cles.date_trouvee IS NOT NULL
+  AND controle_cles.lieu_trouve IS NOT NULL
+
+INSERT OVERWRITE TABLE rejets_fait_deces
+SELECT CAST(controle_cles.deces_key  AS STRING),
+       CAST(controle_cles.date_deces AS STRING),
+       controle_cles.code_commune_deces,
+       CAST(controle_cles.defunt_key AS STRING),
+       controle_cles.numero_acte_deces,
+       concat_ws(', ',
+           CASE WHEN controle_cles.deces_key IS NULL THEN 'deces_key absent' END,
+           CASE WHEN controle_cles.defunt_key IS NULL THEN 'defunt_key absent' END,
+           CASE WHEN controle_cles.date_trouvee IS NULL THEN 'date absente de dim_temps_deces' END,
+           CASE WHEN controle_cles.lieu_trouve IS NULL THEN 'lieu absent de dim_lieu_deces' END),
+       from_unixtime(unix_timestamp())
+WHERE controle_cles.deces_key IS NULL
+   OR controle_cles.defunt_key IS NULL
+   OR controle_cles.date_trouvee IS NULL
+   OR controle_cles.lieu_trouve IS NULL;
 
 -- SATISFACTION
 
