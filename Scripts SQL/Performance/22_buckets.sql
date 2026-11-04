@@ -2,7 +2,7 @@ USE gold;
 
 -- NOTIONS
 -- ORC = Optimized Row Columnar, format de stockage en colonnes, optimisé pour les requêtes analytiques.
--- Bucket = un fichier dans lequel Hive range les lignes selon le hachage d'une colonne
+-- Bucket = un fichier dans lequel Hive range les lignes selon le hachage d'une colonne. Il sert à joindre des tables importantes plus rapidement.
 -- CLUSTERED BY = clause de création de table qui indique la colonne de hachage pour le bucketing
 
 -- Indispensable en Hive 1.1
