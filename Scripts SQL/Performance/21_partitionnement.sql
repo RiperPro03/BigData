@@ -7,8 +7,6 @@ SET hive.exec.dynamic.partition.mode=nonstrict;
 -- NOTIONS
 -- ORC = Optimized Row Columnar, format de stockage en colonnes, optimisé pour les requêtes analytiques.
 -- Partitionnement = au lieu de mettre tous les fichiers dans un seul dossier, Hive crée un sous-dossier par valeur d’une colonne.
--- Bucket = un fichier dans lequel Hive range les lignes selon un calcul fait sur une colonne.
--- Indexation = Hive crée un index sur une colonne pour retrouver plus vite les lignes qui contiennent une valeur donnée.
 
 -- FAIT CONSULTATION PARTITIONNÉ
 
