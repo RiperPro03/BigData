@@ -1,5 +1,7 @@
 USE gold;
 
+-- ORC = Optimized Row Columnar, format de stockage en colonnes, optimisé pour les requêtes analytiques.
+
 -- CONSTELLATION
 
 CREATE EXTERNAL TABLE IF NOT EXISTS rejets_fait_consultation (
@@ -10,7 +12,9 @@ CREATE EXTERNAL TABLE IF NOT EXISTS rejets_fait_consultation (
     id_prof_sante STRING,
     motif STRING,
     horodatage STRING
-);
+)
+STORED AS ORC
+LOCATION '/gold/rejets_fait_consultation';
 
 CREATE EXTERNAL TABLE IF NOT EXISTS rejets_fait_hospitalisation (
     num_hospitalisation STRING,
@@ -20,7 +24,9 @@ CREATE EXTERNAL TABLE IF NOT EXISTS rejets_fait_hospitalisation (
     identifiant_organisation STRING,
     motif STRING,
     horodatage STRING
-);
+)
+STORED AS ORC
+LOCATION '/gold/rejets_fait_hospitalisation';
 
 -- SATISFACTION
 
@@ -32,7 +38,9 @@ CREATE EXTERNAL TABLE IF NOT EXISTS rejets_fait_satisfaction (
     nb_rep_score_all_rea_ajust STRING,
     motif STRING,
     horodatage STRING
-);
+)
+STORED AS ORC
+LOCATION '/gold/rejets_fait_satisfaction';
 
 -- DECES
 
@@ -44,4 +52,6 @@ CREATE EXTERNAL TABLE IF NOT EXISTS rejets_fait_deces (
     numero_acte_deces STRING,
     motif STRING,
     horodatage STRING
-);
+)
+STORED AS ORC
+LOCATION '/gold/rejets_fait_deces';
