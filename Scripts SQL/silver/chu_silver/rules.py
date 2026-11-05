@@ -60,6 +60,17 @@ def pseudonym(value, key):
     return hmac.new(key, patient_id(value).encode('utf-8'), hashlib.sha256).hexdigest()
 
 
+def pro_pseudonym(identifier, key):
+    """HMAC-SHA256 de l'identifiant professionnel deja normalise (prof_id).
+
+    Prefixe de domaine 'pro:' : meme cle que le patient mais jamais le meme
+    pseudonyme, donc pas de recoupement professionnel/patient.
+    """
+    if not key or len(key) < 32:
+        raise ValueError('Cle HMAC absente ou trop courte (32 octets minimum)')
+    return hmac.new(key, (u'pro:' + identifier).encode('utf-8'), hashlib.sha256).hexdigest()
+
+
 def prof_id(value, kind=None):
     value = clean(value)
     if value is None:
@@ -180,7 +191,8 @@ def transform(source, row, key=None, options=None):
             out = {'code_specialite': required(row.get('Code_specialite')),
                    'fonction': clean(row.get('Fonction')), 'specialite': clean(row.get('Specialite'))}
         elif source == 'professionnel':
-            out = {'id_prof_sante': prof_id(row.get('Identifiant'), row.get('Type_identifiant')),
+            out = {'id_prof_sante': pro_pseudonym(
+                       prof_id(row.get('Identifiant'), row.get('Type_identifiant')), key),
                    'categorie': clean(row.get('Categorie_professionnelle')),
                    'profession': clean(row.get('Profession')),
                    'code_specialite': clean(row.get('Code_specialite')),
@@ -189,14 +201,14 @@ def transform(source, row, key=None, options=None):
             out = dict((name, clean(value)) for name, value in row.items())
             out['identifiant_organisation'] = required(row.get('identifiant_organisation'))
         elif source == 'activite':
-            out = {'id_prof_sante': prof_id(row.get('identifiant')),
+            out = {'id_prof_sante': pro_pseudonym(prof_id(row.get('identifiant')), key),
                    'identifiant_organisation': required(row.get('identifiant_organisation')),
                    'mode_exercice': clean(row.get('mode_exercice')) or 'inconnu'}
         elif source == 'consultation':
             out.update({'num_consultation': integer(row.get('Num_consultation'), True),
                         'date_consultation': date_value(row.get('Date'), required=True),
                         'code_diag': required(row.get('Code_diag')),
-                        'id_prof_sante': prof_id(row.get('Id_prof_sante'))})
+                        'id_prof_sante': pro_pseudonym(prof_id(row.get('Id_prof_sante')), key)})
         elif source == 'hospitalisation':
             out.update({'num_hospitalisation': integer(row.get('Num_Hospitalisation'), True),
                         'date_entree': date_value(row.get('Date_Entree'), 'fr', True),
@@ -224,12 +236,10 @@ def transform(source, row, key=None, options=None):
             if birth is not None and birth > death:
                 raise Invalid('NAISSANCE_APRES_DECES')
             code = clean(row.get('code_lieu_deces')) or 'inconnu'
-            out = {'date_deces': death, 'date_naissance': birth, 'sexe': sex(row.get('sexe')),
-                   'code_commune_deces': code, 'code_departement': department(code),
-                   'code_lieu_naissance': clean(row.get('code_lieu_naissance')),
-                   'lieu_naissance': clean(row.get('lieu_naissance')),
-                   'pays_naissance': clean(row.get('pays_naissance')),
-                   'numero_acte_deces': clean(row.get('numero_acte_deces'))}
+            # RGPD / plan de gouvernance 5.3 : la naissance ne sert qu'au controle
+            # de coherence ci-dessus ; naissance et numero d'acte ne sont pas publies.
+            out = {'date_deces': death, 'sexe': sex(row.get('sexe')),
+                   'code_commune_deces': code, 'code_departement': department(code)}
         elif source == 'codes_postaux':
             normalized = dict((token(k), v) for k, v in row.items())
             postal = required(normalized.get('codepostal'))

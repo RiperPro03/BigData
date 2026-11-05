@@ -51,7 +51,8 @@ try:
         else:
             assert first == keys
         assert run.load('deces').filter('code_region IS NULL').count() == 1
-        assert run.load('defunt').filter('date_naissance IS NULL').count() == 1
+        assert sorted(run.load('defunt').columns) == ['defunt_key', 'sexe']
+        assert 'numero_acte_deces' not in run.load('deces').columns
     # Finalisation 08 : contrats et references de toutes les autres tables,
     # a partir d'une seule ligne fictive coherente par table.
     patient = pseudonym('1', b'0' * 32)

@@ -32,8 +32,8 @@ TABLES = {
     "consultation": fields("num_consultation:INT date_consultation:DATE id_patient:STRING code_diag:STRING id_prof_sante:STRING"),
     "hospitalisation": fields("num_hospitalisation:INT date_entree:DATE id_patient:STRING code_diag:STRING identifiant_organisation:STRING"),
     "satisfaction": fields("finess_geo:STRING identifiant_organisation:STRING annee:SMALLINT region:STRING code_region:STRING score_all_rea_ajust:DOUBLE nb_rep_score_all_rea_ajust:INT"),
-    "deces": fields("deces_key:INT date_deces:DATE code_commune_deces:STRING defunt_key:INT numero_acte_deces:STRING code_departement:STRING code_region:STRING libelle_region:STRING statut_rattachement:STRING"),
-    "defunt": fields("defunt_key:INT sexe:STRING date_naissance:DATE code_lieu_naissance:STRING lieu_naissance:STRING pays_naissance:STRING"),
+    "deces": fields("deces_key:INT date_deces:DATE code_commune_deces:STRING defunt_key:INT code_departement:STRING code_region:STRING libelle_region:STRING statut_rattachement:STRING"),
+    "defunt": fields("defunt_key:INT sexe:STRING"),
     "codes_postaux": fields("code_commune_insee:STRING nom_de_la_commune:STRING code_postal:STRING libelle_d_acheminement:STRING"),
     "commune": fields("code_commune_insee:STRING type_commune:STRING code_commune_parent:STRING libelle_commune:STRING code_departement:STRING code_region:STRING libelle_region:STRING statut_rattachement:STRING"),
     "region": fields("code_region:STRING region:STRING")

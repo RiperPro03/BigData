@@ -52,13 +52,13 @@ try:
     assert records[0][0] != records[1][0]
     assert any(row[1]['libelle'] == 'test; cite' for row in records)
     # Dates historiques et schemas explicitement relus.
-    df = sql.createDataFrame([(1, datetime.date(1882, 1, 1), 'inconnu', 1, None, None, None, None, 'NON_RESOLU')],
+    df = sql.createDataFrame([(1, datetime.date(1882, 1, 1), 'inconnu', 1, None, None, None, 'NON_RESOLU')],
                              C.schema(C.TABLES['deces']))
     path = 'file://' + os.path.join(work, 'orc')
     df.write.orc(path)
     result = sql.read.orc(path).collect()[0]
     assert result['date_deces'] == datetime.date(1882, 1, 1)
-    assert result['numero_acte_deces'] is None
+    assert 'numero_acte_deces' not in result.asDict()
     print('CHU_SILVER_INTEGRATION_OK')
 finally:
     sc.stop()

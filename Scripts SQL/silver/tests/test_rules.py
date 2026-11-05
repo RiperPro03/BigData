@@ -72,6 +72,23 @@ class RulesTests(unittest.TestCase):
         self.assertRaises(R.Invalid, R.prof_id, '12345678', 'RPPS')
         self.assertRaises(R.Invalid, R.prof_id, '12345678901', 'ADELI')
 
+    def test_professional_pseudonym(self):
+        pro = {'Identifiant': '12345678', 'Type_identifiant': 'ADELI', 'Nom': 'FICTIF',
+               'Prenom': 'TEST', 'Code_specialite': 'S1'}
+        act = {'identifiant': '012345678', 'identifiant_organisation': 'F010000001'}
+        con = {'Id_patient': '42', 'Num_consultation': '1', 'Id_prof_sante': '012345678',
+               'Code_diag': 'D1', 'Date': '2020-01-01'}
+        ids = [R.transform('professionnel', pro, KEY)[0]['id_prof_sante'],
+               R.transform('activite', act, KEY)[0]['id_prof_sante'],
+               R.transform('consultation', con, KEY)[0]['id_prof_sante']]
+        self.assertEqual(len(set(ids)), 1)               # stable entre les trois sources
+        self.assertEqual(len(ids[0]), 64)                # HMAC-SHA256 hexadecimal complet
+        self.assertNotIn('012345678', ids[0])            # plus d'identifiant en clair
+        self.assertNotEqual(ids[0], R.pseudonym('12345678', KEY))   # separe du domaine patient
+        self.assertEqual(R.pro_pseudonym(u'012345678', KEY), ids[0])
+        self.assertRaises(ValueError, R.pro_pseudonym, u'012345678', b'court')
+        self.assertRaises(ValueError, R.transform, 'activite', act, None)
+
     def test_finess(self):
         self.assertEqual(R.finess('10000001'), '010000001')
         self.assertEqual(R.finess('10000001.0'), '010000001')
@@ -91,9 +108,10 @@ class RulesTests(unittest.TestCase):
                'code_lieu_deces': '2A004', 'nom': 'FICTIF', 'prenom': 'TEST'}
         out, status, motif, warnings = R.transform('deces', row)
         self.assertEqual(status, 'VALID')
-        self.assertEqual(out['date_naissance'], None)
         self.assertEqual(out['code_departement'], '2A')
-        self.assertFalse('nom' in out or 'prenom' in out)
+        for banned in ('nom', 'prenom', 'date_naissance', 'lieu_naissance', 'code_lieu_naissance',
+                       'pays_naissance', 'numero_acte_deces'):
+            self.assertFalse(banned in out)
         self.assertEqual(warnings, 'NAISSANCE_INVALIDE')
         row['date_naissance'] = '2020-01-01'
         self.assertEqual(R.transform('deces', row)[2], 'NAISSANCE_APRES_DECES')
