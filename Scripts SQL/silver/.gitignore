@@ -1,0 +1,17 @@
+__pycache__/
+*.pyc
+*.pyo
+*.key
+*.pem
+config/local*.json
+config/exclusions*
+chu_silver.zip
+spark-warehouse/
+metastore_db/
+derby.log
+artifacts/
+logs/
+*.log
+*.exit
+data/
+rejets/

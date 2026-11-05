@@ -1,5 +1,7 @@
 # Plan des transformations Silver
 
+> Document de conception initial. Le statut du code et les choix effectivement implementes sont maintenant dans [README.md](README.md), [GUIDE_EXECUTION.md](GUIDE_EXECUTION.md) et [ANALYSE_SQL_MAIN.md](ANALYSE_SQL_MAIN.md). Les securisations generales sont reportees a la fin selon la decision du groupe.
+
 Conception du 5 novembre 2026. Les noms de scripts désignent des traitements à implémenter. Les sorties sont détaillées dans [les contrats](CONTRATS_ENTREES_SORTIES.md).
 
 ## 1. Partir du résultat attendu
@@ -171,7 +173,7 @@ Ne pas ajouter de professionnel : il n'existe pas dans cette source. `Suite_diag
 1. Lire uniquement **e-Satis 48 h MCO** des campagnes 2017, 2019 et 2020. Les données de chirurgie ambulatoire, les autres IQSS et les lexiques ne deviennent pas des faits de satisfaction de ce périmètre.
 2. Décoder les CSV 2017/2019 en Windows-1252. Pour 2020, lire la feuille `Resultats` du XLSX avec un lecteur compatible ou une conversion contrôlée dans un espace de préparation séparé ; garder le XLSX Bronze intact.
 3. Récupérer les colonnes communes nécessaires et ajouter `annee` à partir du manifeste du fichier, pas de la date de chargement. Contrôler explicitement l'association fichier–campagne.
-4. Lire `finess_geo` en texte, restaurer les zéros initiaux selon la longueur attendue de neuf chiffres après validation. Dans un classeur, une valeur numérique entière peut avoir perdu sa présentation : la conversion ne doit pas produire `12345678.0` ou une notation scientifique.
+4. Lire `finess_geo` en texte, restaurer les zéros initiaux selon la longueur attendue de neuf caracteres (dont les codes corses 2A/2B) après validation. Dans un classeur, une valeur numérique entière peut avoir perdu sa présentation : la conversion ne doit pas produire `12345678.0` ou une notation scientifique.
 5. Construire `identifiant_organisation = 'F' + finess_geo`. Ne pas utiliser `finess` juridique comme clé du site.
 6. Normaliser la région par correspondance explicite ; conserver le libellé source en provenance pour le diagnostic. Région vide → `inconnu` ; libellé non reconnu → rattachement non résolu et anomalie, pas suppression de la ligne.
 7. Convertir `score_all_rea_ajust` en nombre et `nb_rep_score_all_rea_ajust` en entier, avec séparateur décimal explicitement traité. Score vide/non diffusé → `NULL`, jamais zéro. Distinguer dans les métriques une valeur manquante d'une valeur non vide non convertible.

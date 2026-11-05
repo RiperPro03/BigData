@@ -1,5 +1,7 @@
 # Qualité, rejets et publication Silver
 
+> Document de conception initial. Le statut du code et les choix effectivement implementes sont maintenant dans [README.md](README.md), [GUIDE_EXECUTION.md](GUIDE_EXECUTION.md) et [ANALYSE_SQL_MAIN.md](ANALYSE_SQL_MAIN.md). Les securisations generales sont reportees a la fin selon la decision du groupe.
+
 Ces contrôles font partie des traitements à développer ; ce document n'est pas un rapport de résultats mesurés sur Silver.
 
 ## 1. Précontrôles avant le premier traitement

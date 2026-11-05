@@ -1,97 +1,70 @@
-# Silver
+# Silver — traitements PySpark CHU
 
-Structure de transformation **Bronze → Silver avec PySpark**, établie le 5 novembre 2026 après relecture de l'énoncé, du livrable 1 rendu, de son dictionnaire Gold, de l'audit Bronze et des scripts SQL du dépôt.
+Implementation Bronze → Silver pour **Spark 1.6.0 / Python 2.6.6 / Java 7 / Hive 1.1 CDH 5.12**. Base analysee : les scripts finaux `main/Scripts SQL`, commit `7ed0f68`.
 
-**Statut : conception détaillée. Les scripts Python décrits ci-dessous ne sont pas encore implémentés ni exécutés.** Les documents rendus au livrable 1 et les scripts Gold existants ne sont pas modifiés par ce plan.
+**Statut : code ecrit, tests metier et integration Spark passes sur la VM. Voir VALIDATION.md pour les essais reels, la lecture Hive et la validation des gros volumes restant a effectuer.** Le precedent test PySpark/HMAC de l'utilisateur etait un test fictif local ; ce n'etait pas une execution de ces scripts.
 
-## Le rôle de Silver
-
-Talend a chargé les sources brutes dans HDFS. Spark lit ces fichiers sur le cluster, contrôle leur structure, pseudonymise les patients, retire les données nominatives inutiles, harmonise les formats et vérifie les références. Il écrit des tables de détail fiables pour construire Gold, puis les indicateurs dans Power BI.
-
-```text
-Sources → Talend → Bronze brut HDFS
-                       ↓
-                 PySpark : Silver
-                 ├─ données valides, typées et pseudonymisées
-                 ├─ rejets et exclusions tracés
-                 └─ rapport qualité et réconciliation
-                       ↓
-                 Hive : modèle Gold → Power BI
-```
-
-Le calcul des taux, des moyennes régionales et des tranches d'âge reste dans Gold/BI. Silver conserve le détail nécessaire aux huit besoins métier du sujet, y compris décès et satisfaction, optionnels dans l'énoncé mais retenus dans le livrable 1.
-
-## Les huit traitements à construire
-
-| Ordre / futur script | Fonction | Sorties logiques principales |
-|---|---|---|
-| `01_referentiels.py` | Diagnostics, spécialités, codes postaux, communes et régions | `diagnostic`, `specialite`, `codes_postaux`, `commune`, `region` |
-| `02_patients.py` | HMAC-SHA256, retrait des identifiants directs, sexe et âge | `patient` |
-| `03_professionnels_etablissements.py` | Identifiants professionnels, spécialités, établissements et relations d'activité | `professionnel`, `etablissement`, `activite` |
-| `04_consultations.py` | Dates, pseudonyme patient, unicité et références | `consultation` |
-| `05_hospitalisations.py` | Dates d'entrée, pseudonyme patient, diagnostic et établissement | `hospitalisation` |
-| `06_satisfaction.py` | Réunion e-Satis 48 h MCO 2017/2019/2020, FINESS, régions et mesures | `satisfaction` |
-| `07_deces.py` | Lecture distribuée, retrait des noms, dates, lieux et clés stables | `deces`, `defunt` |
-| `08_qualite_publication.py` | Réconciliation, qualité, lecture Hive et publication d'un lot cohérent | Rapport qualité, manifeste du lot, tables Silver validées |
-
-Ce sont huit unités de traitement, pas huit rechargements Bronze. Un futur `run_silver.py` pilotera leurs dépendances et les précontrôles. Il pourra les lancer séparément pour les reprises.
-
-## Documents de construction
-
-1. [Transformations et dépendances](TRANSFORMATIONS.md) : règles détaillées de chaque branche et correspondance avec les indicateurs finaux.
-2. [Contrats d'entrée et de sortie](CONTRATS_ENTREES_SORTIES.md) : les 15 chemins Bronze, leurs formats et les colonnes Silver attendues.
-3. [Qualité, rejets et publication](QUALITE_ET_PUBLICATION.md) : règles de contrôle, conservation des lignes, stockage, tests et preuves pour le livrable 2.
-4. [Écarts et décisions](ECARTS_ET_DECISIONS.md) : corrections nécessaires avant exécution, notamment dans les SQL Gold.
-
-## Arborescence cible du code
-
-Les seuls fichiers présents à ce stade sont les documents de conception. L'arborescence suivante décrit le code à réaliser :
+## Organisation
 
 ```text
 silver/
-  run_silver.py
-  01_referentiels.py
-  02_patients.py
-  03_professionnels_etablissements.py
-  04_consultations.py
-  05_hospitalisations.py
-  06_satisfaction.py
-  07_deces.py
-  08_qualite_publication.py
-  commun/
-    configuration.py       # chemins, lot, schémas, versions des règles
-    lecture.py             # lecture et validation des différents formats
-    pseudonymisation.py    # HMAC commun aux trois sources patient
-    normalisation.py       # dates, codes et identifiants professionnels
-    qualite.py             # métriques, motifs et réconciliation
-    publication.py         # lots validés, manifeste et reprise
-  config/
-    exemple.json           # configuration sans secret
+  run_silver.py               # point d'entree spark-submit, etapes 01 a 08
+  build_package.py            # construit le ZIP de code pour les executeurs
+  prepare_runtime.py          # exporte le code vers un dossier sans espaces
+  config/exemple.json         # 15 fichiers reels Bronze, sans secret
+  chu_silver/
+    contracts.py             # tables, types, cles et alias attendus par Gold
+    rules.py                 # pseudonymisation et regles metier pures
+    readers.py               # CSV distribue et petits cp1252/XLSX bornes
+    runtime.py               # qualite, rejets, sorties immuables, HQL de publication
+    pipelines.py             # branches metier et leurs dependances
   tests/
-    donnees_fictives/
-    test_regles.py
-    test_integration.py
+    test_rules.py            # tests locaux sans Spark, donnees fictives
+    integration_spark.py     # test Spark fictif a executer sur la VM
+    integration_deces.py     # registre HDFS, homonymes et stabilite des cles
+  sql/correctifs_gold.patch  # corrections proposees, non appliquees au Gold
+  ANALYSE_SQL_MAIN.md         # analyse des 12 SQL et du document de performance
+  GUIDE_EXECUTION.md          # preparation, lancement, lecture des rapports et publication
+  VALIDATION.md               # controles effectivement executes et limites
 ```
 
-Les fichiers numérotés seront des points d'entrée ; la logique réutilisable sera importée depuis `commun`. Les secrets, les données réelles et les sorties d'exécution ne seront pas versionnés. Aucun HMAC fictif ou traitement vide ne doit être présenté comme un script opérationnel.
+Les huit etapes sont des fonctions pilotees par un lanceur commun, pour partager les contrats et eviter de recopier le code de lecture/HMAC dans plusieurs scripts.
 
-## Ordre pratique de réalisation
+| Etape | Sources / traitement | Tables Silver produites |
+|---|---|---|
+| 01 Referentiels | Diagnostic, specialites, codes postaux, COG communes et regions | diagnostic, specialite, codes_postaux, commune, region |
+| 02 Patients | HMAC-SHA256 complet, sexe/age, retrait des identifiants directs | patient |
+| 03 Professionnels / sites | ADELI/RPPS, specialites, 24 colonnes etablissements, liens d'activite | professionnel, etablissement, activite |
+| 04 Consultations | Date, HMAC commun, references, unicite | consultation |
+| 05 Hospitalisations | Date francaise stricte, HMAC commun, references, unicite | hospitalisation |
+| 06 Satisfaction | CSV 2017/2019 et XLSX 2020, FINESS y compris Corse, regions, scores NULL conserves | satisfaction et reference region completee |
+| 07 Deces | CSV distribue, dates ISO, retrait des noms, registre stable des occurrences, geographie | deces, defunt |
+| 08 Qualite / publication | Unicite, schemas, compteurs, empreintes source, generation des HQL | rapport final et HQL, sans activation automatique |
 
-1. Relever les versions réelles Spark/Python/Hive et vérifier les accès à Bronze, aux espaces de travail et au secret HMAC.
-2. Fixer les contrats et les écarts listés dans [ECARTS_ET_DECISIONS.md](ECARTS_ET_DECISIONS.md).
-3. Construire `01`, `02`, puis `03` ; tester la pseudonymisation commune et les clés.
-4. Construire `04` et `05`, puis `06` et `07` ; la branche décès sera testée sur un échantillon fictif avant le volume complet.
-5. Construire `08`, publier un lot Silver contrôlé, puis adapter et exécuter les DDL/DML Gold.
-6. Produire les mesures de qualité, les requêtes de benchmark et les comparaisons de performance demandées pour le livrable 2.
+Les dates et les noms de colonnes sont ceux attendus par Gold. Six alias (`s1_consultation`, `s2_hospitalisation`, `s2_etablissement`, `s2_activite`, `s3_satisfaction`, `s4_deces`) couvrent les noms prefixes encore utilises dans les DML. Les patients sont en **STRING**, conformement au HMAC complet deja decide.
 
-Les précontrôles et le rapport qualité sont nécessaires dès les premiers scripts ; `08` en consolide les résultats.
+## Resultat d'une execution
 
-## Références et priorité des choix
+Les sorties sont en ORC sous `/user/cloudera/chu/silver_runs/<lot>/<tentative>/`. Le format columnar conserve les types ; les tables externes Hive sont explicites. Les partitions de sortie Spark reglent le nombre de fichiers. Cette premiere livraison ne partitionne pas les dossiers Silver par annee : les variantes annuelles et les buckets Gold sont construits par les scripts de performance du groupe, sans multiplier inutilement les fichiers Silver.
 
-- Énoncé « Projet — Cloud Healthcare Unit », sections besoins utilisateurs et livrables attendus ; copie locale dans `Projet/consignes/pages/02-projet.md`.
-- **Rapport réellement rendu** : `Perso/Livrable1_Groupe 1/Livrable1_Groupe 1/Livrable 1.docx`, notamment les trois groupes Gold et les règles S1 à S5 ; dictionnaire dans `MLD/Dictionnaire_Gold.xlsx` du même rendu.
-- Décision du groupe : **Bronze brut, transformations Silver avec PySpark** ; décision HMAC du 3 novembre : pseudonyme complet, identifiants patients Silver/Gold en `STRING`.
-- Audit du 4 novembre : `Projet/diagnostics/2026-11-04/audit-bronze/Audit-Bronze-2026-11-04.md` ; profil `Projet/analyses/longueurs/profil_sources.json`.
-- Scripts Gold du dépôt relus à partir du commit `7ed0f68`.
+Chaque tentative cree ses propres sorties et son audit. Elle n'ecrase ni Bronze ni un resultat precedent. Une relance utilise une nouvelle tentative ; elle rejoue les dependances et reutilise le registre de cles deces pour le meme fichier. Les entrees sont empreintees avant/apres traitement. Un lot partiel ou en echec n'est pas publie.
 
-Les décisions explicites du groupe priment sur les anciens plans Talend/Hive de transformation. Le README général du dépôt contient encore des descriptions anciennes ; il ne remplace pas le rapport rendu ni les décisions ci-dessus. Les corrections de cohérence sont explicitées, sans réécriture silencieuse du livrable 1.
+La grande source deces est lue sur les blocs HDFS : aucune collecte des faits au driver. Seuls les petits fichiers cp1252/XLSX (limite 8 Mio) et le COG borne (50 000 lignes maximum) utilisent une preparation sur le driver. Les grosses references sont jointes par Spark ; seules les petites specialites et la correspondance COG sont diffusees. Le nombre de partitions est configurable, avec persistance sur disque pour les donnees reutilisees.
+
+## Regles protegeant les resultats
+
+- Meme HMAC-SHA256, normalisation et cle dans Patient, Consultation et Hospitalisations. Cle fournie par fichier externe ; aucune valeur par defaut dans le code ou Git.
+- Les noms de patients/professionnels et de defunts ne sont pas repris. Patient ne publie que pseudonyme, sexe et age ; le motif libre des consultations est exclu.
+- Chaque rejet contient une reference technique, une categorie et un motif, sans recopier la ligne brute.
+- Les repetitions identiques autorisees sont distinguees des conflits de cle ; tous les membres d'un conflit sont rejetes. Les relations multisites restent multiples dans l'activite, sans multiplication des consultations.
+- Les homonymes et occurrences de deces identiques restent distincts. Un registre persistant attribue une cle INT par offset du fichier source, pas par nom ni numero d'acte.
+- Score e-Satis manquant → NULL ; un poids manquant/nul est signale. Aucune moyenne regionale ni taux de soins n'est calcule en Silver.
+- Le COG est ramene a une correspondance par code : les variantes TYPECOM sont tracees pour eviter de multiplier les deces. Les lieux inconnus et historiques non resolus restent presents.
+
+## A lire avant Gold
+
+[ANALYSE_SQL_MAIN.md](ANALYSE_SQL_MAIN.md) detaille les ecarts des SQL finaux : INT patient, GROUP BY incomplets, commentaire SQL invalide, region des deces et controle du defunt. Le patch fourni est une proposition de correction des scripts ; il ne migre aucune table deja chargee et n'a pas ete applique au Gold.
+
+[GUIDE_EXECUTION.md](GUIDE_EXECUTION.md) contient les commandes de test et de lancement. [VALIDATION.md](VALIDATION.md) distingue les tests deja passes de ceux restant a executer sur la VM.
+
+Les quatre documents de conception initiaux restent consultables : [transformations](TRANSFORMATIONS.md), [contrats](CONTRATS_ENTREES_SORTIES.md), [qualite](QUALITE_ET_PUBLICATION.md), [decisions](ECARTS_ET_DECISIONS.md). Ils decrivent la cible et les evolutions possibles ; ce README et le guide precisent ce que cette livraison implemente effectivement. A la demande du groupe, les reglages generaux de securite Spark et la finalisation documentaire RGPD sont reportes ; la pseudonymisation et la minimisation sont deja dans le code.

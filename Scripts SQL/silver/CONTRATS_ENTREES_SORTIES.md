@@ -1,5 +1,7 @@
 # Contrats d'entrée et de sortie Silver
 
+> Document de conception initial. Le statut du code et les choix effectivement implementes sont maintenant dans [README.md](README.md), [GUIDE_EXECUTION.md](GUIDE_EXECUTION.md) et [ANALYSE_SQL_MAIN.md](ANALYSE_SQL_MAIN.md). Les securisations generales sont reportees a la fin selon la decision du groupe.
+
 Référence du lot initial : audit Bronze du 4 novembre 2026. Les nombres servent à rapprocher ce lot, pas à imposer une volumétrie immuable aux suivants. Aucun compte de lignes Silver n'a encore été mesuré.
 
 ## 1. Les 15 fichiers Bronze

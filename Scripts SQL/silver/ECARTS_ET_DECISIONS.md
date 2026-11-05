@@ -1,5 +1,7 @@
 # Écarts repérés et décisions de réalisation
 
+> Document de conception initial. Le statut du code et les choix effectivement implementes sont maintenant dans [README.md](README.md), [GUIDE_EXECUTION.md](GUIDE_EXECUTION.md) et [ANALYSE_SQL_MAIN.md](ANALYSE_SQL_MAIN.md). Les securisations generales sont reportees a la fin selon la decision du groupe.
+
 État au 5 novembre 2026. Ce relevé permet de construire Silver et Gold sans propager les incohérences. Il ne modifie ni le livrable 1 rendu ni les scripts Gold du groupe. Les adaptations listées restent à implémenter.
 
 ## 1. Choix déjà pris par le groupe

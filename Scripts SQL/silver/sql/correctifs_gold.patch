@@ -1,0 +1,134 @@
+--- a/Scripts SQL/DDL/01_DDL_dimensions.sql
++++ b/Scripts SQL/DDL/01_DDL_dimensions.sql
+@@ -15,7 +15,7 @@
+ LOCATION '/gold/dim_temps';
+ 
+ CREATE EXTERNAL TABLE IF NOT EXISTS dim_patient (
+-    id_patient INT,
++    id_patient STRING,
+     sexe STRING,
+     age INT
+ )
+@@ -90,7 +90,9 @@
+     nom_de_la_commune STRING,
+     code_postal STRING,
+     libelle_d_acheminement STRING,
+-    code_departement STRING
++    code_departement STRING,
++    code_region STRING,
++    libelle_region STRING
+ )
+ STORED AS ORC
+ LOCATION '/gold/dim_lieu_deces';
+\ No newline at end of file
+--- a/Scripts SQL/DDL/03_DDL_faits.sql
++++ b/Scripts SQL/DDL/03_DDL_faits.sql
+@@ -8,7 +8,7 @@
+ CREATE EXTERNAL TABLE IF NOT EXISTS fait_consultation (
+     num_consultation INT,
+     date_consultation DATE,
+-    id_patient INT,
++    id_patient STRING,
+     code_diag STRING,
+     id_prof_sante STRING
+ )
+@@ -18,7 +18,7 @@
+ CREATE EXTERNAL TABLE IF NOT EXISTS fait_hospitalisation (
+     num_hospitalisation INT,
+     date_entree DATE,
+-    id_patient INT,
++    id_patient STRING,
+     code_diag STRING,
+     identifiant_organisation STRING
+ )
+--- a/Scripts SQL/DML/11_DML_dimensions.sql
++++ b/Scripts SQL/DML/11_DML_dimensions.sql
+@@ -35,13 +35,13 @@
+ SELECT id_patient, sexe, age
+ FROM silver.patient
+ WHERE id_patient IS NOT NULL
+-GROUP BY id_patient;
++GROUP BY id_patient, sexe, age;
+ 
+ INSERT OVERWRITE TABLE dim_diagnostic
+ SELECT code_diag, libelle
+ FROM silver.diagnostic
+ WHERE code_diag IS NOT NULL
+-GROUP BY code_diag;
++GROUP BY code_diag, libelle;
+ 
+ INSERT OVERWRITE TABLE dim_etablissement
+ SELECT etablissements.identifiant_organisation,
+@@ -64,7 +64,7 @@
+         FROM silver.s2_etablissement source
+         WHERE source.identifiant_organisation IS NOT NULL
+     ) numerotes
+-    WHERE numerotes.rang = 1 pour éviter les doublons (on ne garde que la ligne de rang 1 pour chaque identifiant)
++    WHERE numerotes.rang = 1 -- pour éviter les doublons (on ne garde que la ligne de rang 1 pour chaque identifiant)
+ 
+     UNION ALL
+ 
+@@ -78,7 +78,7 @@
+ SELECT id_prof_sante, categorie, profession, specialite
+ FROM silver.professionnel
+ WHERE id_prof_sante IS NOT NULL
+-GROUP BY id_prof_sante;
++GROUP BY id_prof_sante, categorie, profession, specialite;
+ 
+ -- SATISFACTION
+ INSERT OVERWRITE TABLE dim_temps_satisfaction
+@@ -122,10 +122,14 @@
+        codes_postaux.nom_de_la_commune,
+        codes_postaux.code_postal,
+        codes_postaux.libelle_d_acheminement,
+-       communes.code_departement
++       communes.code_departement,
++       communes.code_region,
++       communes.libelle_region
+ FROM (
+     SELECT code_commune_deces AS code_commune_insee,
+-           MAX(code_departement) AS code_departement
++           MAX(code_departement) AS code_departement,
++           MAX(code_region) AS code_region,
++           MAX(libelle_region) AS libelle_region
+     FROM silver.deces
+     WHERE code_commune_deces IS NOT NULL
+     GROUP BY code_commune_deces
+--- a/Scripts SQL/DML/13_DML_faits.sql
++++ b/Scripts SQL/DML/13_DML_faits.sql
+@@ -122,8 +122,11 @@
+            deces.defunt_key,
+            deces.numero_acte_deces,
+            calendrier_deces.`date` AS date_trouvee,
+-           lieu.code_commune_insee AS lieu_trouve
++           lieu.code_commune_insee AS lieu_trouve,
++           defunt.defunt_key AS defunt_trouve
+     FROM silver.s4_deces deces
++    LEFT JOIN dim_defunt defunt
++           ON defunt.defunt_key = deces.defunt_key
+     LEFT JOIN dim_temps_deces calendrier_deces
+            ON calendrier_deces.`date` = deces.date_deces
+     LEFT JOIN dim_lieu_deces lieu
+@@ -138,6 +141,7 @@
+        controle_cles.numero_acte_deces
+ WHERE controle_cles.deces_key IS NOT NULL
+   AND controle_cles.defunt_key IS NOT NULL
++  AND controle_cles.defunt_trouve IS NOT NULL
+   AND controle_cles.date_trouvee IS NOT NULL
+   AND controle_cles.lieu_trouve IS NOT NULL
+ 
+@@ -149,12 +153,13 @@
+        controle_cles.numero_acte_deces,
+        concat_ws(', ',
+            CASE WHEN controle_cles.deces_key IS NULL THEN 'deces_key absent' END,
+-           CASE WHEN controle_cles.defunt_key IS NULL THEN 'defunt_key absent' END,
++           CASE WHEN controle_cles.defunt_key IS NULL OR controle_cles.defunt_trouve IS NULL THEN 'defunt absent de dim_defunt' END,
+            CASE WHEN controle_cles.date_trouvee IS NULL THEN 'date absente de dim_temps_deces' END,
+            CASE WHEN controle_cles.lieu_trouve IS NULL THEN 'lieu absent de dim_lieu_deces' END),
+        from_unixtime(unix_timestamp())
+ WHERE controle_cles.deces_key IS NULL
+    OR controle_cles.defunt_key IS NULL
++   OR controle_cles.defunt_trouve IS NULL
+    OR controle_cles.date_trouvee IS NULL
+    OR controle_cles.lieu_trouve IS NULL;
+ 

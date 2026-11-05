@@ -1,0 +1,249 @@
+{
+  "bronze_root": "/user/cloudera/chu/bronze",
+  "runs_root": "/user/cloudera/chu/silver_runs",
+  "keys_root": "/user/cloudera/chu/technical_keys",
+  "small_file_limit_bytes": 8388608,
+  "max_communes_driver": 50000,
+  "shuffle_partitions": 16,
+  "output_partitions": {
+    "diagnostic": 2,
+    "specialite": 1,
+    "codes_postaux": 2,
+    "commune": 2,
+    "region": 1,
+    "patient": 4,
+    "professionnel": 8,
+    "etablissement": 4,
+    "activite": 8,
+    "consultation": 8,
+    "hospitalisation": 1,
+    "satisfaction": 1,
+    "deces": 16,
+    "defunt": 16
+  },
+  "region_aliases": {
+    "PACA": "Provence-Alpes-Cote d'Azur",
+    "IDF": "Ile-de-France"
+  },
+  "sources": {
+    "diagnostic": {
+      "path": "postgres/diagnostic/diagnostic.txt",
+      "delimiter": ";",
+      "encoding": "utf-8",
+      "header": false,
+      "columns": [
+        "Code_diag",
+        "Diagnostic"
+      ]
+    },
+    "specialite": {
+      "path": "postgres/specialites/specialites.txt",
+      "delimiter": ";",
+      "encoding": "utf-8",
+      "header": false,
+      "columns": [
+        "Code_specialite",
+        "Fonction",
+        "Specialite"
+      ]
+    },
+    "patient": {
+      "path": "postgres/patients/patients.txt",
+      "delimiter": ";",
+      "encoding": "utf-8",
+      "header": false,
+      "columns": [
+        "Id_patient",
+        "Nom",
+        "Prenom",
+        "Sexe",
+        "Adresse",
+        "Ville",
+        "Code_postal",
+        "Pays",
+        "EMail",
+        "Tel",
+        "Date",
+        "Age",
+        "Num_Secu",
+        "Groupe_sanguin",
+        "Poid",
+        "Taille"
+      ]
+    },
+    "professionnel": {
+      "path": "postgres/professionnels/professionnels.txt",
+      "delimiter": ";",
+      "encoding": "utf-8",
+      "header": false,
+      "columns": [
+        "Identifiant",
+        "Civilite",
+        "Categorie_professionnelle",
+        "Nom",
+        "Prenom",
+        "Profession",
+        "Type_identifiant",
+        "Code_specialite"
+      ]
+    },
+    "consultation": {
+      "path": "postgres/consultations/consultations.txt",
+      "delimiter": ";",
+      "encoding": "utf-8",
+      "header": false,
+      "columns": [
+        "Num_consultation",
+        "Id_mut",
+        "Id_patient",
+        "Id_prof_sante",
+        "Code_diag",
+        "Motif",
+        "Date",
+        "Heure_debut",
+        "Heure_fin"
+      ]
+    },
+    "etablissement": {
+      "path": "etablissements/etablissement_sante.csv",
+      "delimiter": ";",
+      "encoding": "utf-8",
+      "required": [
+        "identifiant_organisation",
+        "raison_sociale_site",
+        "finess_site",
+        "finess_etablissement_juridique",
+        "code_commune",
+        "commune",
+        "code_postal",
+        "adresse",
+        "cedex",
+        "complement_destinataire",
+        "complement_point_geographique",
+        "email",
+        "enseigne_commerciale_site",
+        "indice_repetition_voie",
+        "mention_distribution",
+        "numero_voie",
+        "pays",
+        "siren_site",
+        "siret_site",
+        "telecopie",
+        "telephone",
+        "telephone_2",
+        "type_voie",
+        "voie"
+      ]
+    },
+    "activite": {
+      "path": "etablissements/activite_professionnel_sante.csv",
+      "delimiter": ";",
+      "encoding": "utf-8",
+      "required": [
+        "identifiant",
+        "identifiant_organisation",
+        "mode_exercice"
+      ]
+    },
+    "hospitalisation": {
+      "path": "csv_sante/Hospitalisations.csv",
+      "delimiter": ";",
+      "encoding": "utf-8",
+      "required": [
+        "Num_Hospitalisation",
+        "Id_patient",
+        "identifiant_organisation",
+        "Code_diagnostic",
+        "Suite_diagnostic_consultation",
+        "Date_Entree",
+        "Jour_Hospitalisation"
+      ]
+    },
+    "satisfaction_2017": {
+      "path": "satisfaction/2017/ESATIS48H_MCO_recueil2017_donnees.csv",
+      "delimiter": ";",
+      "encoding": "cp1252",
+      "small": true,
+      "required": [
+        "finess_geo",
+        "region",
+        "score_all_rea_ajust",
+        "nb_rep_score_all_rea_ajust"
+      ]
+    },
+    "satisfaction_2019": {
+      "path": "satisfaction/2019/resultats-esatis48h-mco-open-data-2019.csv",
+      "delimiter": ";",
+      "encoding": "cp1252",
+      "small": true,
+      "required": [
+        "finess_geo",
+        "region",
+        "score_all_rea_ajust",
+        "nb_rep_score_all_rea_ajust"
+      ]
+    },
+    "satisfaction_2020": {
+      "path": "satisfaction/2020/resultats-esatis48h-mco-open-data-2020.xlsx",
+      "format": "xlsx",
+      "sheet": "Resultats",
+      "required": [
+        "finess_geo",
+        "region",
+        "score_all_rea_ajust",
+        "nb_rep_score_all_rea_ajust"
+      ]
+    },
+    "deces": {
+      "path": "deces/deces.csv",
+      "delimiter": ",",
+      "encoding": "utf-8",
+      "required": [
+        "nom",
+        "prenom",
+        "sexe",
+        "date_naissance",
+        "code_lieu_naissance",
+        "lieu_naissance",
+        "pays_naissance",
+        "date_deces",
+        "code_lieu_deces",
+        "numero_acte_deces"
+      ]
+    },
+    "codes_postaux": {
+      "path": "referentiels_geographiques/codes_postaux_laposte_extrait_2026-11-03.csv",
+      "delimiter": ";",
+      "encoding": "cp1252",
+      "small": true,
+      "required": [
+        "#Code_commune_INSEE",
+        "Nom_de_la_commune",
+        "Code_postal",
+        "Libell\u00e9_d_acheminement"
+      ]
+    },
+    "cog_communes": {
+      "path": "referentiels_geographiques/v_commune_2024.csv",
+      "delimiter": ",",
+      "encoding": "utf-8",
+      "required": [
+        "TYPECOM",
+        "COM",
+        "REG",
+        "DEP",
+        "LIBELLE",
+        "COMPARENT"
+      ]
+    },
+    "cog_regions": {
+      "path": "referentiels_geographiques/v_region_2024.csv",
+      "delimiter": ",",
+      "encoding": "utf-8",
+      "required": [
+        "REG",
+        "LIBELLE"
+      ]
+    }
+  }
+}
