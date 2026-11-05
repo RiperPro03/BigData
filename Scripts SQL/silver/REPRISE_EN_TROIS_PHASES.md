@@ -26,18 +26,23 @@ immuables : ils ne recalculent pas l'empreinte de chaque fichier de sortie.
   reussi avec le parametrage ci-dessous ; les volumes reels restent a mesurer.
   La VM a 2 CPU virtuels : les 3 vCores YARN incluent notamment le conteneur
   ApplicationMaster et ne representent pas 3 processeurs physiques.
-- Preparer une nouvelle livraison apres mise a jour du depot Git :
+- Sur la VM CESI active, la version optimisee est deja preparee dans
+  `~/chu_silver_runtime_v6`, depuis le commit de code
+  `d55a63b2573f60419972262ad3395220282352a6` :
 
 ```bash
-cd ~/chu-bigdata-dev-20261105/'Scripts SQL'/silver
-python prepare_runtime.py ~/chu_silver_runtime_v6
 cd ~/chu_silver_runtime_v6
+cat DEPLOYED_COMMIT.txt
 python tests/test_reprise.py
 spark-submit --master 'local[1]' --conf spark.dynamicAllocation.enabled=false --conf spark.eventLog.enabled=false tests/integration_reprise.py
 ```
 
-Si le depot VM a un autre chemin, adapter `cd`. `prepare_runtime.py` refuse une
-destination existante : choisir un nouveau suffixe. Ne pas recreer ni remplacer
+Pour une livraison ulterieure, placer d'abord une copie a jour du depot Git sur
+la VM, puis executer `python prepare_runtime.py ~/chu_silver_runtime_v7` depuis
+son dossier `Scripts SQL/silver`. Le dossier `chu-bigdata-dev-20261105` peut
+etre une copie simple et n'est pas necessairement une copie Git a jour.
+`prepare_runtime.py` refuse une destination existante : choisir un nouveau
+suffixe si besoin. Ne pas recreer ni remplacer
 `~/.chu/hmac-test.key` : la meme cle est necessaire a chaque phase.
 
 ## Phase 01 — hors deces
