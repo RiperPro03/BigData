@@ -22,7 +22,10 @@ immuables : ils ne recalculent pas l'empreinte de chaque fichier de sortie.
   simultanement avec le job precedent en attente `application_1793864138399_0009`.
 - Conserver Bronze, les tentatives Silver et le registre des cles deces.
 - Les commandes suivantes concernent uniquement un environnement remis en etat.
-  Le parametrage memoire est un point de depart a mesurer, pas une garantie.
+  YARN a ete regle a 4096 Mio et 3 vCores virtuels. Un petit calcul fictif a
+  reussi avec le parametrage ci-dessous ; les volumes reels restent a mesurer.
+  La VM a 2 CPU virtuels : les 3 vCores YARN incluent notamment le conteneur
+  ApplicationMaster et ne representent pas 3 processeurs physiques.
 - Preparer une nouvelle livraison apres mise a jour du depot Git :
 
 ```bash
@@ -44,9 +47,9 @@ exemple : il doit etre nouveau a chaque lancement.
 
 ```bash
 spark-submit --master yarn --deploy-mode client \
-  --driver-memory 1g --executor-memory 1g --executor-cores 2 --num-executors 1 \
+  --driver-memory 1g --executor-memory 1536m --executor-cores 2 --num-executors 1 \
   --conf spark.dynamicAllocation.enabled=false \
-  --conf spark.yarn.executor.memoryOverhead=768 \
+  --conf spark.yarn.executor.memoryOverhead=1024 \
   --py-files chu_silver.zip 01_silver_hors_deces.py \
   --config config/exemple.json --lot-id initial_20261105 \
   --attempt-id hors_deces_v1 \
@@ -64,9 +67,9 @@ la VM, utiliser plutot `--legacy-attempt` comme ci-dessous :
 
 ```bash
 spark-submit --master yarn --deploy-mode client \
-  --driver-memory 1g --executor-memory 1g --executor-cores 2 --num-executors 1 \
+  --driver-memory 1g --executor-memory 1536m --executor-cores 2 --num-executors 1 \
   --conf spark.dynamicAllocation.enabled=false \
-  --conf spark.yarn.executor.memoryOverhead=768 \
+  --conf spark.yarn.executor.memoryOverhead=1024 \
   --py-files chu_silver.zip 02_silver_deces.py \
   --config config/exemple.json --lot-id initial_20261105 \
   --attempt-id deces_reprise_v1 \
@@ -98,9 +101,9 @@ la tentative en echec pour contourner le controle.
 
 ```bash
 spark-submit --master yarn --deploy-mode client \
-  --driver-memory 1g --executor-memory 1g --executor-cores 2 --num-executors 1 \
+  --driver-memory 1g --executor-memory 1536m --executor-cores 2 --num-executors 1 \
   --conf spark.dynamicAllocation.enabled=false \
-  --conf spark.yarn.executor.memoryOverhead=768 \
+  --conf spark.yarn.executor.memoryOverhead=1024 \
   --py-files chu_silver.zip 03_silver_controles.py \
   --config config/exemple.json --lot-id initial_20261105 \
   --attempt-id controles_v1 \
