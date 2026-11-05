@@ -12,6 +12,9 @@ le code des transformations reste partage et les checkpoints conservent la
 filiation des tentatives. `run_silver.py` reste disponible comme ancien mode
 de lancement monolithique.
 
+Les optimisations qui conservent les controles et resultats sont decrites dans
+[OPTIMISATIONS_SANS_CHANGEMENT.md](OPTIMISATIONS_SANS_CHANGEMENT.md).
+
 ```text
 silver/
   01_silver_hors_deces.py    # etapes 01 a 06, checkpoint 01

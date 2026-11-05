@@ -93,3 +93,17 @@ Le pipeline genere des scripts de publication, mais la bascule de plusieurs vues
   le cluster YARN repare, ni sur les 25 millions de deces. Le cluster etait en
   attente, NodeManager `UNHEALTHY` par manque de place, lors de ces tests.
 - Aucun resultat final Silver ni publication Hive n'a ete produit par ces tests.
+
+## Optimisations sans changement de resultat — 5 novembre 2026
+
+- Tests sous Python 2.6 sur la VM : 19 regles, 5 reprises et 1 test de
+  normalisation valides. Le test de checkpoints Spark 1.6 reste passant.
+- Comparaison avant/apres Spark 1.6 : reussie en local et sur YARN avec 7 000
+  deces fictifs lors du dernier test. Les lignes et doublons, les cles, les
+  rejets, les motifs, les compteurs, les NULL, les schemas et les cas de table
+  vide et cardinalite incorrecte ont ete compares.
+- Micro-mesure Python 2.6 sur deux passages de 100 000 lignes fictives : 1,706 s
+  avec empreinte technique et 0,863 s sans, pour la normalisation seule. Ce
+  chiffre ne mesure pas le temps global Spark.
+- La branche des 25 millions de deces n'a pas encore ete relancee avec les
+  optimisations ; aucune duree ni publication reelle n'est annoncee.

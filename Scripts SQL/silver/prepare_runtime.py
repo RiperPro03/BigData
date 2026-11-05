@@ -21,9 +21,10 @@ def main():
     os.makedirs(target)
     files = ['run_silver.py', '01_silver_hors_deces.py', '02_silver_deces.py',
              '03_silver_controles.py', 'build_package.py', 'config/exemple.json',
-             'tests/test_rules.py', 'tests/test_reprise.py',
+             'tests/test_rules.py', 'tests/test_reprise.py', 'tests/test_performance_semantique.py',
              'tests/integration_spark.py', 'tests/integration_deces.py',
-             'tests/integration_reprise.py', 'tests/integration_ancien_checkpoint.py']
+             'tests/integration_reprise.py', 'tests/integration_ancien_checkpoint.py',
+             'tests/integration_performance_equivalence.py', 'tests/benchmark_empreinte_deces.py']
     files += ['chu_silver/' + name for name in os.listdir(os.path.join(source, 'chu_silver'))
               if name.endswith('.py')]
     for relative in files:

@@ -83,7 +83,7 @@ class RulesTests(unittest.TestCase):
                R.transform('consultation', con, KEY)[0]['id_prof_sante']]
         self.assertEqual(len(set(ids)), 1)               # stable entre les trois sources
         self.assertEqual(len(ids[0]), 64)                # HMAC-SHA256 hexadecimal complet
-        self.assertNotIn('012345678', ids[0])            # plus d'identifiant en clair
+        self.assertTrue('012345678' not in ids[0])       # compatible Python 2.6
         self.assertNotEqual(ids[0], R.pseudonym('12345678', KEY))   # separe du domaine patient
         self.assertEqual(R.pro_pseudonym(u'012345678', KEY), ids[0])
         self.assertRaises(ValueError, R.pro_pseudonym, u'012345678', b'court')

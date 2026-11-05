@@ -69,7 +69,7 @@ class Run(object):
         return read_records(self.sc, self.path(spec), source, spec,
                             self.config.get('small_file_limit_bytes', 8388608))
 
-    def normalized(self, source, kind, spec, options=None, records=None):
+    def normalized(self, source, kind, spec, options=None, records=None, compute_payload=True):
         """Une passe Python par partition ; pas de relecture par attribut/UDF."""
         key = self.key
         opts = dict(options or {})
@@ -81,8 +81,8 @@ class Run(object):
             for record_id, row in iterator:
                 values, status, motif, warnings = rules.transform(kind, row, key, opts)
                 business = [values.get(name) for name in names]
-                yield tuple(business + [record_id, status, motif, warnings,
-                                        rules.payload_hash(business)])
+                payload = rules.payload_hash(business) if compute_payload else None
+                yield tuple(business + [record_id, status, motif, warnings, payload])
         return self.sql.createDataFrame(records.mapPartitions(batch), C.schema(spec + META))
 
     def annotate(self, df, condition, motif, category='REJECT'):
@@ -144,7 +144,7 @@ class Run(object):
         # Sans table, l'appelant libere df apres avoir materialise ses derives.
         return accepted, df
 
-    def save(self, table, df, expected=None):
+    def save(self, table, df, expected=None, extra_quality=None):
         from pyspark.sql import functions as F
         started = time.time()
         df = df.select(*C.names(table))
@@ -155,9 +155,6 @@ class Run(object):
         # Spark 1.6 : pas de repartitionByRange ni de coalesce(1) massif.
         df.repartition(partitions).write.mode('error').orc(path)
         readback = self.sql.read.orc(path)
-        actual = readback.count()
-        if expected is not None and actual != expected:
-            raise ValueError('Cardinalite modifiee pour ' + table)
         if readback.schema != C.schema(C.TABLES[table]):
             # ORC peut rendre nullable une colonne non nullable ; notre
             # contrat utilise nullable=True, seuls noms/types sont imposes.
@@ -165,15 +162,28 @@ class Run(object):
             expected_schema = [(f.name, f.dataType.simpleString()) for f in C.schema(C.TABLES[table]).fields]
             if actual_schema != expected_schema:
                 raise ValueError('Schema relu incompatible : ' + table)
-        completeness = readback.agg(*[
-            F.sum(F.when(F.col(name).isNull(), 1).otherwise(0)).alias(name)
-            for name in C.names(table)]).collect()[0].asDict()
-        nulls = dict((name, int(value or 0)) for name, value in completeness.items())
+        # Meme bilan qu'auparavant, mais une seule lecture ORC pour le nombre
+        # de lignes, les NULL et les compteurs specifiques demandes.
+        row_count = '__chu_rows'
+        columns = C.names(table)
+        extra_quality = extra_quality or {}
+        if row_count in columns or set(extra_quality).intersection(columns + [row_count]):
+            raise ValueError('Nom de compteur reserve deja utilise')
+        expressions = [F.count(F.lit(1)).alias(row_count)]
+        expressions.extend(F.sum(F.when(F.col(name).isNull(), 1).otherwise(0)).alias(name)
+                           for name in columns)
+        expressions.extend(extra_quality[name].alias(name) for name in sorted(extra_quality))
+        summary = readback.agg(*expressions).collect()[0].asDict()
+        actual = int(summary[row_count])
+        if expected is not None and actual != expected:
+            raise ValueError('Cardinalite modifiee pour ' + table)
+        nulls = dict((name, int(summary[name] or 0)) for name in columns)
         self.outputs[table] = {'path': path, 'rows': actual, 'nulls': nulls,
             'completeness': dict((name, (float(actual - n) / actual if actual else None))
                                  for name, n in nulls.items()),
             'seconds': round(time.time() - started, 3), 'partitions_requested': partitions,
             'schema': C.TABLES[table]}
+        return dict((name, int(summary[name] or 0)) for name in extra_quality)
 
     def load(self, table):
         if table not in self.outputs:

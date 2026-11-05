@@ -213,7 +213,9 @@ def deces(run):
     from pyspark.sql import functions as F
     spec = C.TABLES['deces'] + C.TABLES['defunt'][1:]
     # code departement calcule dans la passe Python ; region enrichie ensuite.
-    df = run.normalized('deces', 'deces', spec).persist(run.level)
+    # Les deces conservent toutes les occurrences : unique() n'utilise donc
+    # pas leur empreinte de doublon interne, absente des sorties et des rejets.
+    df = run.normalized('deces', 'deces', spec, compute_payload=False).persist(run.level)
     fingerprint = run.fingerprints['deces']
     identity = {'checksum': fingerprint['checksum'], 'length': fingerprint['length'],
                 'parser_contract': 'hadoop_text_offset_csv_v1'}
@@ -260,13 +262,15 @@ def deces(run):
               .withColumn('statut_rattachement', F.when(F.col('_lib').isNull(), F.lit('NON_RESOLU')).otherwise(F.lit('COG_2024'))))
     accepted, cached = run.finish('deces', joined)
     count = run.metrics['deces']['VALID']
-    run.save('deces', accepted, count)
+    missing_region_2019 = F.sum(F.when(
+        (F.year('date_deces') == 2019) & F.col('code_region').isNull(), 1).otherwise(0))
+    quality = run.save('deces', accepted, count,
+                       extra_quality={'__chu_region_2019_unresolved': missing_region_2019})
     run.save('defunt', accepted, count)
     cached.unpersist()
     df.unpersist()
     run.metrics['deces']['key_registry'] = registry
-    run.metrics['deces']['region_2019_unresolved'] = run.load('deces').filter(
-        (F.year('date_deces') == 2019) & F.col('code_region').isNull()).count()
+    run.metrics['deces']['region_2019_unresolved'] = quality['__chu_region_2019_unresolved']
 
 
 PIPELINES = [('01', referentiels), ('02', patients), ('03', professionnels_etablissements),
