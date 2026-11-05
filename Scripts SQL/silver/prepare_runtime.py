@@ -19,8 +19,11 @@ def main():
         raise ValueError('La destination doit etre nouvelle et sans espaces')
     source = os.path.dirname(os.path.abspath(__file__))
     os.makedirs(target)
-    files = ['run_silver.py', 'build_package.py', 'config/exemple.json',
-             'tests/test_rules.py', 'tests/integration_spark.py', 'tests/integration_deces.py']
+    files = ['run_silver.py', '01_silver_hors_deces.py', '02_silver_deces.py',
+             '03_silver_controles.py', 'build_package.py', 'config/exemple.json',
+             'tests/test_rules.py', 'tests/test_reprise.py',
+             'tests/integration_spark.py', 'tests/integration_deces.py',
+             'tests/integration_reprise.py', 'tests/integration_ancien_checkpoint.py']
     files += ['chu_silver/' + name for name in os.listdir(os.path.join(source, 'chu_silver'))
               if name.endswith('.py')]
     for relative in files:

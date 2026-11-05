@@ -1,5 +1,10 @@
 # Tester et executer Silver sur la VM
 
+**Pour une reprise en trois phases, utiliser en priorite
+[REPRISE_EN_TROIS_PHASES.md](REPRISE_EN_TROIS_PHASES.md).** Les commandes
+`run_silver.py` ci-dessous decrivent le lanceur historique monolithique : une
+relance avec lui recalcule les etapes precedentes.
+
 Les commandes utilisent l'environnement confirme du groupe : Spark 1.6.0, Python 2.6.6, Java 7. Pas de `pip install pyspark` ni de mise a niveau systeme requise par ces scripts.
 
 **Spark 1.6 sur cette VM refuse les URI de scripts contenant des espaces (`Scripts%20SQL`).** Depuis le dossier `Scripts SQL/silver` du depot, preparer un nouveau dossier d'execution sans espaces :

@@ -75,3 +75,21 @@ Points de qualite a presenter au groupe avant activation :
 Le traitement deces est valide sur donnees fictives, y compris son registre et la lecture Hive. Le passage complet des 25 millions de lignes, ses temps, ses rejets reels et sa consommation disque restent a mesurer. Le controle de structure de 25 millions de lignes ne constitue pas ce traitement Silver.
 
 Le pipeline genere des scripts de publication, mais la bascule de plusieurs vues Hive demande une fenetre sans lecture Gold et une procedure de retour ; elle n'a pas ete executee sur les donnees reelles. Les migrations Gold et les benchmarks avant/apres restent des travaux distincts. Les reglages generaux de securite sont reportes par decision du groupe ; la pseudonymisation et la minimisation sont dans les scripts.
+
+## Reprise en trois phases — 5 novembre 2026
+
+- Tests sans Spark : 19 tests des regles et 5 tests des identites/checkpoints
+  reussis sous Windows ; les 5 tests de reprise passent aussi sous Python 2.6
+  sur la VM.
+- Spark 1.6 en mode local sur la VM : test de bout en bout des checkpoints 01
+  et 02 avec tables ORC fictives, controle des schemas et refus d'une cle HMAC
+  differente : `CHU_SILVER_REPRISE_INTEGRATION_OK`.
+- Spark local sur la VM, en lecture seule : le lot historique
+  `a20261105193046f8b2a7` est relu avec les empreintes Bronze actuelles, les
+  schemas et la comparaison des ensembles de pseudonymes patients ; resultat
+  `CHU_SILVER_LEGACY_CHECKPOINT_OK`. Ceci n'efface pas la difference connue des
+  identifiants professionnels ni ne prouve toute la configuration historique.
+- Les trois nouveaux lanceurs n'ont pas encore ete executes de bout en bout sur
+  le cluster YARN repare, ni sur les 25 millions de deces. Le cluster etait en
+  attente, NodeManager `UNHEALTHY` par manque de place, lors de ces tests.
+- Aucun resultat final Silver ni publication Hive n'a ete produit par ces tests.

@@ -6,8 +6,17 @@ Implementation Bronze → Silver pour **Spark 1.6.0 / Python 2.6.6 / Java 7 / Hi
 
 ## Organisation
 
+**Reprise en trois phases :** utiliser [REPRISE_EN_TROIS_PHASES.md](REPRISE_EN_TROIS_PHASES.md).
+Les trois lanceurs separent les sources hors deces, les deces et les controles ;
+le code des transformations reste partage et les checkpoints conservent la
+filiation des tentatives. `run_silver.py` reste disponible comme ancien mode
+de lancement monolithique.
+
 ```text
 silver/
+  01_silver_hors_deces.py    # etapes 01 a 06, checkpoint 01
+  02_silver_deces.py         # etape 07, checkpoint 02
+  03_silver_controles.py     # etape 08, controles et preparation Hive
   run_silver.py               # point d'entree spark-submit, etapes 01 a 08
   build_package.py            # construit le ZIP de code pour les executeurs
   prepare_runtime.py          # exporte le code vers un dossier sans espaces
@@ -18,6 +27,7 @@ silver/
     readers.py               # CSV distribue et petits cp1252/XLSX bornes
     runtime.py               # qualite, rejets, sorties immuables, HQL de publication
     pipelines.py             # branches metier et leurs dependances
+    split.py                 # checkpoints et validation de la reprise
   tests/
     test_rules.py            # tests locaux sans Spark, donnees fictives
     integration_spark.py     # test Spark fictif a executer sur la VM
@@ -28,7 +38,7 @@ silver/
   VALIDATION.md               # controles effectivement executes et limites
 ```
 
-Les huit etapes sont des fonctions pilotees par un lanceur commun, pour partager les contrats et eviter de recopier le code de lecture/HMAC dans plusieurs scripts.
+Les huit etapes sont des fonctions partagees par les lanceurs, sans recopier le code de lecture ni les regles HMAC.
 
 | Etape | Sources / traitement | Tables Silver produites |
 |---|---|---|
@@ -47,7 +57,7 @@ Les dates et les noms de colonnes sont ceux attendus par Gold. Six alias (`s1_co
 
 Les sorties sont en ORC sous `/user/cloudera/chu/silver_runs/<lot>/<tentative>/`. Le format columnar conserve les types ; les tables externes Hive sont explicites. Les partitions de sortie Spark reglent le nombre de fichiers. Cette premiere livraison ne partitionne pas les dossiers Silver par annee : les variantes annuelles et les buckets Gold sont construits par les scripts de performance du groupe, sans multiplier inutilement les fichiers Silver.
 
-Chaque tentative cree ses propres sorties et son audit. Elle n'ecrase ni Bronze ni un resultat precedent. Une relance utilise une nouvelle tentative ; elle rejoue les dependances et reutilise le registre de cles deces pour le meme fichier. Les entrees sont empreintees avant/apres traitement. Un lot partiel ou en echec n'est pas publie.
+Chaque tentative cree ses propres sorties et son audit. Elle n'ecrase ni Bronze ni un resultat precedent. Avec les trois lanceurs, une phase reprend les sorties d'un checkpoint anterieur sans recalculer les autres branches ; le registre de cles deces est reutilise pour le meme fichier. Les entrees sont empreintees avant/apres traitement. Un lot partiel ou en echec n'est pas publie.
 
 La grande source deces est lue sur les blocs HDFS : aucune collecte des faits au driver. Seuls les petits fichiers cp1252/XLSX (limite 8 Mio) et le COG borne (50 000 lignes maximum) utilisent une preparation sur le driver. Les grosses references sont jointes par Spark ; seules les petites specialites et la correspondance COG sont diffusees. Le nombre de partitions est configurable, avec persistance sur disque pour les donnees reutilisees.
 

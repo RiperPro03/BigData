@@ -192,7 +192,7 @@ class Run(object):
         if df.filter(condition).limit(1).count():
             raise ValueError('Cle NULL dans ' + table)
 
-    def complete(self):
+    def complete(self, prepare_publication=True):
         """Controle global puis DDL de publication versionnee (sans bascule)."""
         if set(self.outputs) != set(C.TABLES):
             raise ValueError('Tables Silver incompletes')
@@ -230,6 +230,13 @@ class Run(object):
         for name, spec in sorted(self.config['sources'].items()):
             if self.fingerprint(self.path(spec)) != self.fingerprints[name]:
                 raise ValueError('Source modifiee pendant le traitement : ' + name)
+        if not prepare_publication:
+            self.write_json('rapport_controles.json', {'status': 'CHECKS_OK_NOT_READY',
+                'reason': 'Lot historique : pseudonymisation professionnelle a mettre en coherence.',
+                'lot_id': self.lot, 'attempt_id': self.attempt,
+                'outputs': self.outputs, 'metrics': self.metrics})
+            print('SILVER_CHECKS_OK_NOT_READY : ' + self.audit)
+            return
         locations = dict((name, value['path']) for name, value in self.outputs.items())
         db = 'silver_' + self.lot.lower() + '_' + self.attempt.lower()
         # Les noms lot/tentative sont valides par le lanceur.

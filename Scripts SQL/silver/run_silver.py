@@ -23,6 +23,8 @@ def arguments():
     parser.add_option('--key-version', dest='key_version', help='Version logique publique de la cle')
     parser.add_option('--exclude-pseudonyms-file', dest='exclude_file', help='Liste locale des HMAC exclus, un par ligne')
     parser.add_option('--until', dest='until', default='08', help='Arret apres 01..08 (08 = complet)')
+    parser.add_option('--source-attempt', dest='source_attempt', help='Tentative achevee de la phase precedente')
+    parser.add_option('--legacy-attempt', dest='legacy_attempt', help='Import explicite du lot historique documente')
     options, positional = parser.parse_args()
     if positional or not all([options.config, options.lot, options.key_file, options.key_version]):
         parser.error('--config, --lot-id, --hmac-key-file et --key-version sont obligatoires')
@@ -36,10 +38,7 @@ def arguments():
     return options
 
 
-def main():
-    options = arguments()
-    with open(options.config, 'rb') as stream:
-        config = json.loads(stream.read().decode('utf-8'))
+def validate_setup(config):
     roots = [config[name] for name in ('bronze_root', 'runs_root', 'keys_root')]
     for root in roots:
         if not root.startswith('/') or root == '/' or posixpath.normpath(root) != root:
@@ -48,6 +47,9 @@ def main():
         for other in roots[i + 1:]:
             if root == other or root.startswith(other + '/') or other.startswith(root + '/'):
                 raise ValueError('Bronze, sorties et registre doivent etre dans des espaces disjoints')
+
+
+def read_key_and_exclusions(options):
     with open(options.key_file, 'rb') as stream:
         key = stream.read(4097)
     if len(key) < 32 or len(key) > 4096:
@@ -62,6 +64,17 @@ def main():
                 excluded.add(value)
                 if len(excluded) > 100000:
                     raise ValueError('Liste des exclusions trop volumineuse pour cette implementation')
+    return key, excluded
+
+
+def main():
+    options = arguments()
+    if options.source_attempt or options.legacy_attempt:
+        raise ValueError('Utiliser les trois lanceurs Silver pour une reprise par phase')
+    with open(options.config, 'rb') as stream:
+        config = json.loads(stream.read().decode('utf-8'))
+    validate_setup(config)
+    key, excluded = read_key_and_exclusions(options)
     from pyspark import SparkConf, SparkContext
     from pyspark.sql import HiveContext
     from chu_silver.runtime import Run
