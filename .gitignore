@@ -1,0 +1,19 @@
+
+# Artifacts locaux Silver
+Scripts SQL/silver/__pycache__/
+*.pyc
+*.pyo
+*.key
+*.pem
+Scripts SQL/silver/config/local*.json
+Scripts SQL/silver/config/exclusions*
+Scripts SQL/silver/chu_silver.zip
+Scripts SQL/silver/spark-warehouse/
+Scripts SQL/silver/metastore_db/
+Scripts SQL/silver/derby.log
+Scripts SQL/silver/artifacts/
+Scripts SQL/silver/logs/
+*.log
+*.exit
+Scripts SQL/silver/data/
+Scripts SQL/silver/rejets/

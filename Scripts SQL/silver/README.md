@@ -1,83 +1,94 @@
-# Silver — traitements PySpark CHU
+# Alimentation Silver
 
-Implementation Bronze → Silver pour **Spark 1.6.0 / Python 2.6.6 / Java 7 / Hive 1.1 CDH 5.12**. Base analysee : les scripts finaux `main/Scripts SQL`, commit `7ed0f68`.
+Talend depose les sources dans Bronze. Ces scripts PySpark 1.6 / Python 2.6
+transforment les donnees et remplacent integralement la version Silver publiee.
 
-**Statut : code ecrit, tests metier et integration Spark passes sur la VM. Voir VALIDATION.md pour les essais reels, la lecture Hive et la validation des gros volumes restant a effectuer.** Le precedent test PySpark/HMAC de l'utilisateur etait un test fictif local ; ce n'etait pas une execution de ces scripts.
+## Fichiers
 
-## Organisation
+- `configuration.py` : chemins HDFS, sources, formats et nombre de fichiers de sortie.
+- `01_silver_hors_deces.py`, `02_silver_deces.py`, `03_silver_controles.py` : trois phases normales.
+- `run_silver.py` : execution complete en une commande.
+- `chu_silver/` : lecteurs, transformations, contrats, controles et publication.
+- `prepare_runtime.py`, `build_package.py` : preparation du code pour Spark.
 
-**Reprise en trois phases :** utiliser [REPRISE_EN_TROIS_PHASES.md](REPRISE_EN_TROIS_PHASES.md).
-Les trois lanceurs separent les sources hors deces, les deces et les controles ;
-le code des transformations reste partage et les checkpoints conservent la
-filiation des tentatives. `run_silver.py` reste disponible comme ancien mode
-de lancement monolithique.
-
-Les optimisations qui conservent les controles et resultats sont decrites dans
-[OPTIMISATIONS_SANS_CHANGEMENT.md](OPTIMISATIONS_SANS_CHANGEMENT.md).
+## Stockage et remplacement
 
 ```text
-silver/
-  01_silver_hors_deces.py    # etapes 01 a 06, checkpoint 01
-  02_silver_deces.py         # etape 07, checkpoint 02
-  03_silver_controles.py     # etape 08, controles et preparation Hive
-  run_silver.py               # point d'entree spark-submit, etapes 01 a 08
-  build_package.py            # construit le ZIP de code pour les executeurs
-  prepare_runtime.py          # exporte le code vers un dossier sans espaces
-  config/exemple.json         # 15 fichiers reels Bronze, sans secret
-  chu_silver/
-    contracts.py             # tables, types, cles et alias attendus par Gold
-    rules.py                 # pseudonymisation et regles metier pures
-    readers.py               # CSV distribue et petits cp1252/XLSX bornes
-    runtime.py               # qualite, rejets, sorties immuables, HQL de publication
-    pipelines.py             # branches metier et leurs dependances
-    split.py                 # checkpoints et validation de la reprise
-  tests/
-    test_rules.py            # tests locaux sans Spark, donnees fictives
-    integration_spark.py     # test Spark fictif a executer sur la VM
-    integration_deces.py     # registre HDFS, homonymes et stabilite des cles
-  sql/correctifs_gold.patch  # corrections proposees, non appliquees au Gold
-  ANALYSE_SQL_MAIN.md         # analyse des 12 SQL et du document de performance
-  GUIDE_EXECUTION.md          # preparation, lancement, lecture des rapports et publication
-  VALIDATION.md               # controles effectivement executes et limites
+/user/cloudera/chu/
+  bronze/
+  silver/
+    tables/                  14 tables ORC disponibles dans Hive : silver.*
+    rejets/                  rejets du lot publie
+    audit/                   rapport_final.json, manifeste, bilans qualite
+      technical_keys/deces/  registre persistant des cles deces
 ```
 
-Les huit etapes sont des fonctions partagees par les lanceurs, sans recopier le code de lecture ni les regles HMAC.
+Chaque alimentation complete recalcule un instantane depuis Bronze. Elle ne
+fait ni append ni mise a jour ligne par ligne. Bronze doit donc contenir toutes
+les donnees a conserver, y compris les annees historiques.
 
-| Etape | Sources / traitement | Tables Silver produites |
-|---|---|---|
-| 01 Referentiels | Diagnostic, specialites, codes postaux, COG communes et regions | diagnostic, specialite, codes_postaux, commune, region |
-| 02 Patients | HMAC-SHA256 complet, sexe/age, retrait des identifiants directs | patient |
-| 03 Professionnels / sites | ADELI/RPPS, specialites, 24 colonnes etablissements, liens d'activite | professionnel, etablissement, activite |
-| 04 Consultations | Date, HMAC commun, references, unicite | consultation |
-| 05 Hospitalisations | Date francaise stricte, HMAC commun, references, unicite | hospitalisation |
-| 06 Satisfaction | CSV 2017/2019 et XLSX 2020, FINESS y compris Corse, regions, scores NULL conserves | satisfaction et reference region completee |
-| 07 Deces | CSV distribue, dates ISO, retrait des noms, registre stable des occurrences, geographie | deces, defunt |
-| 08 Qualite / publication | Unicite, schemas, compteurs, empreintes source, generation des HQL | rapport final et HQL, sans activation automatique |
+Les calculs et checkpoints des trois phases sont temporaires dans
+`/user/cloudera/chu/.silver_work/runs/<lot>/<tentative>/`. Apres les controles,
+la publication copie les 14 tables et les rejets dans un dossier temporaire,
+compare les checksums HDFS, remplace Silver par renommage et verifie les schemas
+Hive. L'ancienne version est supprimee apres succes. En cas d'echec pendant la
+bascule, elle est restauree ; les donnees temporaires restent pour diagnostic.
+Les dossiers temporaires vides sont retires apres publication.
 
-Les dates et les noms de colonnes sont ceux attendus par Gold. Six alias (`s1_consultation`, `s2_hospitalisation`, `s2_etablissement`, `s2_activite`, `s3_satisfaction`, `s4_deces`) couvrent les noms prefixes encore utilises dans les DML. Les patients sont en **STRING**, conformement au HMAC complet deja decide.
+Le registre des cles deces est conserve a chaque remplacement pour que les memes
+occurrences gardent leurs identifiants. Conserver egalement la meme cle HMAC,
+hors du depot. La version initiale est `test_v1` sur la maquette.
 
-## Resultat d'une execution
+Executer une seule alimentation Silver a la fois et suspendre les lectures Gold
+pendant la publication : les renommages HDFS successifs et la premiere creation
+des objets Hive ne constituent pas une transaction commune.
 
-Les sorties sont en ORC sous `/user/cloudera/chu/silver_runs/<lot>/<tentative>/`. Le format columnar conserve les types ; les tables externes Hive sont explicites. Les partitions de sortie Spark reglent le nombre de fichiers. Cette premiere livraison ne partitionne pas les dossiers Silver par annee : les variantes annuelles et les buckets Gold sont construits par les scripts de performance du groupe, sans multiplier inutilement les fichiers Silver.
+## Preparation sur la VM
 
-Chaque tentative cree ses propres sorties et son audit. Elle n'ecrase ni Bronze ni un resultat precedent. Avec les trois lanceurs, une phase reprend les sorties d'un checkpoint anterieur sans recalculer les autres branches ; le registre de cles deces est reutilise pour le meme fichier. Les entrees sont empreintees avant/apres traitement. Un lot partiel ou en echec n'est pas publie.
+Depuis le dossier `Scripts SQL/silver` :
 
-La grande source deces est lue sur les blocs HDFS : aucune collecte des faits au driver. Seuls les petits fichiers cp1252/XLSX (limite 8 Mio) et le COG borne (50 000 lignes maximum) utilisent une preparation sur le driver. Les grosses references sont jointes par Spark ; seules les petites specialites et la correspondance COG sont diffusees. Le nombre de partitions est configurable, avec persistance sur disque pour les donnees reutilisees.
+```bash
+python prepare_runtime.py /home/cloudera/chu_silver_final
+cd /home/cloudera/chu_silver_final
+```
 
-## Regles protegeant les resultats
+La destination doit etre nouvelle et sans espaces. Aucun secret n'est copie.
 
-- Meme HMAC-SHA256, normalisation et cle dans Patient, Consultation et Hospitalisations. Cle fournie par fichier externe ; aucune valeur par defaut dans le code ou Git.
-- Les noms de patients/professionnels et de defunts ne sont pas repris. Patient ne publie que pseudonyme, sexe et age ; le motif libre des consultations est exclu.
-- Chaque rejet contient une reference technique, une categorie et un motif, sans recopier la ligne brute.
-- Les repetitions identiques autorisees sont distinguees des conflits de cle ; tous les membres d'un conflit sont rejetes. Les relations multisites restent multiples dans l'activite, sans multiplication des consultations.
-- Les homonymes et occurrences de deces identiques restent distincts. Un registre persistant attribue une cle INT par offset du fichier source, pas par nom ni numero d'acte.
-- Score e-Satis manquant → NULL ; un poids manquant/nul est signale. Aucune moyenne regionale ni taux de soins n'est calcule en Silver.
-- Le COG est ramene a une correspondance par code : les variantes TYPECOM sont tracees pour eviter de multiplier les deces. Les lieux inconnus et historiques non resolus restent presents.
+## Execution complete
 
-## A lire avant Gold
+```bash
+spark-submit --master yarn --deploy-mode client \
+  --driver-memory 1g --executor-memory 1536m \
+  --executor-cores 2 --num-executors 1 \
+  --conf spark.dynamicAllocation.enabled=false \
+  --conf spark.yarn.executor.memoryOverhead=1024 \
+  --py-files chu_silver.zip run_silver.py \
+  --config configuration.py --lot-id initial_20261105 \
+  --hmac-key-file /home/cloudera/.chu/hmac-test.key --key-version test_v1
+```
 
-[ANALYSE_SQL_MAIN.md](ANALYSE_SQL_MAIN.md) detaille les ecarts des SQL finaux : INT patient, GROUP BY incomplets, commentaire SQL invalide, region des deces et controle du defunt. Le patch fourni est une proposition de correction des scripts ; il ne migre aucune table deja chargee et n'a pas ete applique au Gold.
+Le message `SILVER_REPLACED` confirme la publication. `SILVER_READY` seul indique
+que les calculs ont passe les controles, avant la publication finale.
 
-[GUIDE_EXECUTION.md](GUIDE_EXECUTION.md) contient les commandes de test et de lancement. [VALIDATION.md](VALIDATION.md) distingue les tests deja passes de ceux restant a executer sur la VM.
+## Execution en trois phases
 
-Les quatre documents de conception initiaux restent consultables : [transformations](TRANSFORMATIONS.md), [contrats](CONTRATS_ENTREES_SORTIES.md), [qualite](QUALITE_ET_PUBLICATION.md), [decisions](ECARTS_ET_DECISIONS.md). Ils decrivent la cible et les evolutions possibles ; ce README et le guide precisent ce que cette livraison implemente effectivement. A la demande du groupe, les reglages generaux de securite Spark et la finalisation documentaire RGPD sont reportes ; la pseudonymisation et la minimisation sont deja dans le code.
+Utiliser les memes options Spark et HMAC que ci-dessus, avec :
+
+1. `01_silver_hors_deces.py --attempt-id hors_deces_01`
+2. `02_silver_deces.py --attempt-id deces_01 --source-attempt hors_deces_01`
+3. `03_silver_controles.py --attempt-id controles_01 --source-attempt deces_01`
+
+Passer le meme `--lot-id` et la meme configuration aux trois phases. La phase 03
+publie automatiquement apres succes des controles. Les deux premieres phases
+conservent leurs checkpoints temporaires pour la suite. Choisir des identifiants
+nouveaux a chaque execution ; une tentative existante est refusee. Une reprise
+exige les memes sources, le meme code, la meme configuration et la meme cle.
+Apres publication, ces checkpoints temporaires sont retires.
+
+## Controles
+
+Les traitements conservent les regles de typage, normalisation, pseudonymisation
+HMAC-SHA256, dedoublonnage autorise et quarantaine. Ils verifient les schemas,
+les comptes, l'unicite, les references, la reconciliation source/sorties et les
+empreintes Bronze. Le rapport du lot publie est dans `silver/audit/rapport_final.json`.
+Le Gold reste une etape distincte a valider avec ses propres SQL.

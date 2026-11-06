@@ -266,3 +266,6 @@ class Run(object):
             'inputs_id': self.input_id, 'outputs': self.outputs, 'metrics': self.metrics,
             'hive_database': db, 'seconds': round(time.time() - self.started, 3)})
         print('SILVER_READY : ' + self.audit)
+        if self.config.get('publication_root'):
+            from .publication import publish
+            publish(self)

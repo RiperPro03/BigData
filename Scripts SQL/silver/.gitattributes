@@ -1,5 +1,0 @@
-# Les lignes de contexte vides d'un patch contiennent un espace intentionnel.
-*.py text eol=lf
-*.json text eol=lf
-*.md text eol=lf
-sql/*.patch -whitespace

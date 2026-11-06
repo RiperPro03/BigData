@@ -16,7 +16,7 @@ from optparse import OptionParser
 
 def arguments():
     parser = OptionParser()
-    parser.add_option('--config', dest='config', help='Configuration JSON locale')
+    parser.add_option('--config', dest='config', default='configuration.py', help='Configuration Python (CONFIG) ou JSON locale')
     parser.add_option('--lot-id', dest='lot', help='Identifiant du lot [a-z0-9_], 32 caracteres max')
     parser.add_option('--attempt-id', dest='attempt', help='Optionnel : identifiant unique de tentative')
     parser.add_option('--hmac-key-file', dest='key_file', help='Fichier binaire local, jamais sa valeur')
@@ -49,6 +49,17 @@ def validate_setup(config):
                 raise ValueError('Bronze, sorties et registre doivent etre dans des espaces disjoints')
 
 
+def load_config(path):
+    if path.endswith('.py'):
+        namespace = {}
+        with open(path, 'rb') as stream:
+            code = compile(stream.read(), path, 'exec')
+        eval(code, namespace)
+        return namespace['CONFIG']
+    with open(path, 'rb') as stream:
+        return json.loads(stream.read().decode('utf-8'))
+
+
 def read_key_and_exclusions(options):
     with open(options.key_file, 'rb') as stream:
         key = stream.read(4097)
@@ -71,8 +82,7 @@ def main():
     options = arguments()
     if options.source_attempt or options.legacy_attempt:
         raise ValueError('Utiliser les trois lanceurs Silver pour une reprise par phase')
-    with open(options.config, 'rb') as stream:
-        config = json.loads(stream.read().decode('utf-8'))
+    config = load_config(options.config)
     validate_setup(config)
     key, excluded = read_key_and_exclusions(options)
     from pyspark import SparkConf, SparkContext

@@ -18,7 +18,7 @@ from . import contracts as C
 from . import rules
 from .runtime import Run
 from .pipelines import PIPELINES
-from run_silver import arguments
+from run_silver import arguments, load_config
 
 LEGACY_ATTEMPT = 'a20261105193046f8b2a7'
 LEGACY_CONFIG = '439b32dee1b69a027efa5a5bd4e179ac420d816631669850611ff1a7d314a82f'
@@ -161,8 +161,7 @@ def main(stage):
         raise ValueError('Phase 02 : fournir exactement --source-attempt ou --legacy-attempt')
     if stage == '03' and (not options.source_attempt or options.legacy_attempt):
         raise ValueError('Phase 03 : fournir --source-attempt de la phase 02')
-    with open(options.config, 'rb') as stream:
-        config = json.loads(stream.read().decode('utf-8'))
+    config = load_config(options.config)
     # Les memes validations de chemins, de cle et de contexte que le lanceur
     # historique restent partagees, sans changement des regles metier.
     from run_silver import validate_setup, read_key_and_exclusions
