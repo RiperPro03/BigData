@@ -99,18 +99,52 @@ n'est jamais remplace par zero.
 
 ## Performance, apres la reference
 
-Valider et mesurer d'abord les resultats des tables de reference. Ensuite :
+1. `Performance/20_statistiques_reference.sql` : recalculer les statistiques des tables de reference sans changer les lignes.
+2. Executer la phase `reference` des benchmarks : elle constitue une premiere mesure avant creation des variantes.
+3. `Performance/21_partitionnement.sql` : variantes par annee.
+4. `Performance/22_buckets.sql` : deces et defunts, 16 buckets sur `defunt_key`.
+5. `Performance/23_tri_intra_partition.sql` : variantes triees distinctes ; aucun index n'est cree par ce tri.
+6. `Performance/24_creer_index_compact.sql`, puis `25_reconstruire_index_compact.sql` : creation et construction d'un index compact sur le diagnostic de consultation.
+7. `Performance/26_verifier_index_compact.sql` : inspecter le metastore et le plan pour la requete selective.
+8. Executer la phase `comparaison`, verifier l'egalite des resultats, puis mesurer et documenter les variantes.
 
-- `Performance/21_partitionnement.sql` : variantes par annee.
-- `Performance/22_buckets.sql` : variantes deces/defunts en 16 buckets.
-- `Performance/23_tri_intra_partition.sql` : variantes partitionnees et triees distinctes, sans ecraser la variante seulement partitionnee.
+L'index est experimental sur cette version Hive 1.1. Son activation est limitee
+aux sessions de benchmark (`hive.optimize.index.filter=true` et seuil minimal de
+0). Elle n'est pas activee globalement. La construction et le stockage ont un
+cout ; un gain n'est pas garanti. Apres chaque INSERT OVERWRITE sur
+`fait_consultation`, reconstruire l'index avec le script 25 avant de l'utiliser.
+Le script 24 est reserve a la premiere creation : verifier `SHOW INDEX ON
+fait_consultation` avant de le rejouer.
 
-Le dernier fichier remplace `23_indexation.sql`. Il ne cree pas d'index explicite.
 Pour chaque comparaison, partir de variantes partitionnees vides : un INSERT
 OVERWRITE avec partitions dynamiques ne remplace que les partitions presentes
-dans le flux du lancement. Une ancienne partition absente du nouveau flux doit
-etre retiree avant de reconstruire une variante existante.
+dans le flux. Une ancienne partition absente du nouveau flux doit etre retiree
+avant de reconstruire une variante existante.
 
-Mesurer les memes requetes, sur les memes donnees, et verifier des resultats
-identiques avant de conclure a un gain. L'egalite des seuls nombres de lignes
-ne suffit pas. Les benchmarks restent a executer et a documenter.
+Les requetes de `Performance/Benchmarks/` couvrent les besoins du projet et comprennent
+une jointure complementaire pour les buckets. Elles utilisent des fenetres
+identiques dans les deux versions et conservent la meme definition de mesure.
+Pour executer depuis SSH apres avoir prepare le repertoire de journalisation :
+
+```bash
+mkdir -p /home/cloudera/.chu/gold_perf
+cd '/home/cloudera/Scripts SQL/Performance/Benchmarks'
+python executer_benchmarks.py --phase reference --output /home/cloudera/.chu/gold_perf/resultats.json
+# Executer ensuite les scripts 21 a 26 dans l'ordre, avec leurs controles.
+python executer_benchmarks.py --phase comparaison --output /home/cloudera/.chu/gold_perf/resultats.json
+```
+
+Le programme reprend les mesures terminees, compare une empreinte des resultats
+et interrompt la campagne en cas de difference ou de modification des tables.
+Il ne conserve pas les lignes de resultats dans le journal. Le temps rapporte
+inclut le lancement du client Beeline et la lecture des resultats. Le cache du
+systeme n'est pas vide ; l'ordre et les horaires sont conserves. Les mesures
+sont repetees trois fois, avec des comparaisons alternees ; comparer les medianes
+et ne pas presenter la satisfaction, qui utilise la meme table, comme une
+optimisation. Les buckets ne garantissent pas un plan de jointure specifique :
+examiner le plan avant de leur attribuer un gain.
+
+Avant de conclure, verifier la concordance sur l'ensemble des tables, pas
+seulement sur les requetes echantillons, puis produire les graphiques. Si un
+chargement est relance, verifier et nettoyer explicitement les anciennes
+partitions absentes du nouveau lot avant toute nouvelle comparaison.
