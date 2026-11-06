@@ -5,6 +5,7 @@ import datetime
 import hashlib
 import json
 import os
+import re
 import subprocess
 import sys
 import tempfile
@@ -114,7 +115,10 @@ def main():
         finally:
             os.remove(temporary)
         elapsed=round(time.time()-started,3)
-        rows=[x.strip() for x in out.replace(b'\r\n',b'\n').splitlines() if x.strip()]
+        # Beeline 1.1 emet parfois des indicateurs de progression \rnull sur stdout.
+        # Ils ne font pas partie du resultat SQL et varient selon la duree.
+        clean=re.sub(b'\\rnull[ \t]*',b'',out).replace(b'\r\n',b'\n')
+        rows=[x.strip() for x in clean.splitlines() if x.strip()]
         result=hashlib.sha256(b'\n'.join(rows)).hexdigest()
         item={'scenario':name,'variant':variant,'iteration':iteration,'seconds':elapsed,
               'started_utc':started_utc,
