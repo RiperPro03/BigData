@@ -1019,72 +1019,10 @@ def satisfaction(run):
         run.outputs.pop('region_reference')
 
 
-def deces(run):
-    from pyspark.sql import functions as F
-    spec = C.TABLES['deces'] + C.TABLES['defunt'][1:]
-    # code departement calcule dans la passe Python ; region enrichie ensuite.
-    # Les deces conservent toutes les occurrences : unique() n'utilise donc
-    # pas leur empreinte de doublon interne, absente des sorties et des rejets.
-    df = run.normalized('deces', 'deces', spec, compute_payload=False).persist(run.level)
-    fingerprint = run.fingerprints['deces']
-    identity = {'checksum': fingerprint['checksum'], 'length': fingerprint['length'],
-                'parser_contract': 'hadoop_text_offset_csv_v1'}
-    file_id = hashlib.sha256(json.dumps(identity, sort_keys=True).encode('utf-8')).hexdigest()
-    registry = run.config['keys_root'].rstrip('/') + '/deces/' + file_id
-    target = run.Path(registry)
-    if run.fs.exists(target):
-        if not run.fs.exists(run.Path(registry + '/_SUCCESS')):
-            raise ValueError('Registre de cles incomplet : intervention necessaire')
-        mapping = run.sql.read.orc(registry)
-    else:
-        lock = run.Path(registry + '.lock')
-        run.fs.mkdirs(lock.getParent())
-        stream = run.fs.create(lock, False)  # verrou exclusif inter-processus
-        stream.close()
-        # Seules les references techniques sont indexees, pas les noms/valeurs.
-        ids = df.select('_record_id').rdd.map(lambda row: row['_record_id']).zipWithIndex()
-        mapping = run.sql.createDataFrame(ids.map(lambda pair: (pair[0], pair[1] + 1)),
-            C.schema([('_record_id', 'STRING'), ('_allocated_key', 'BIGINT')]))
-        maximum = mapping.agg(F.max('_allocated_key').alias('maximum')).collect()[0]['maximum'] or 0
-        if maximum > 2147483647:
-            raise ValueError('Registre deces depasse INT : migration BIGINT necessaire')
-        staging = registry + '.staging_' + run.attempt
-        mapping.write.mode('error').orc(staging)
-        if run.fs.exists(target) or not run.fs.rename(run.Path(staging), target):
-            raise ValueError('Publication du registre impossible')
-        run.fs.delete(lock, False)
-        mapping = run.sql.read.orc(registry)
-    if mapping.groupBy('_record_id').count().filter('count > 1').limit(1).count():
-        raise ValueError('Registre duplique')
-    joined = df.join(mapping, '_record_id', 'left_outer')
-    if joined.filter(F.col('_allocated_key').isNull()).limit(1).count():
-        raise ValueError('Registre incompatible avec la lecture source')
-    joined = (joined.withColumn('deces_key', F.col('_allocated_key').cast('int'))
-              .withColumn('defunt_key', F.col('_allocated_key').cast('int')))
-    geo = run.load('commune').select(
-        F.col('code_commune_insee').alias('_commune'),
-        F.col('code_departement').alias('_dep'),
-        F.col('code_region').alias('_reg'), F.col('libelle_region').alias('_lib'))
-    joined = joined.join(F.broadcast(geo), joined['code_commune_deces'] == geo['_commune'], 'left_outer')
-    joined = (joined.withColumn('code_departement', F.coalesce(F.col('_dep'), F.col('code_departement')))
-              .withColumn('code_region', F.col('_reg'))
-              .withColumn('libelle_region', F.col('_lib'))
-              .withColumn('statut_rattachement', F.when(F.col('_lib').isNull(), F.lit('NON_RESOLU')).otherwise(F.lit('COG_2024'))))
-    accepted, cached = run.finish('deces', joined)
-    count = run.metrics['deces']['VALID']
-    missing_region_2019 = F.sum(F.when(
-        (F.year('date_deces') == 2019) & F.col('code_region').isNull(), 1).otherwise(0))
-    quality = run.save('deces', accepted, count,
-                       extra_quality={'__chu_region_2019_unresolved': missing_region_2019})
-    run.save('defunt', accepted, count)
-    cached.unpersist()
-    df.unpersist()
-    run.metrics['deces']['key_registry'] = registry
-    run.metrics['deces']['region_2019_unresolved'] = quality['__chu_region_2019_unresolved']
 
 
 PIPELINES = [('01', referentiels), ('02', patients), ('03', professionnels_etablissements),
-             ('04', consultations), ('05', hospitalisations), ('06', satisfaction), ('07', deces)]
+             ('04', consultations), ('05', hospitalisations), ('06', satisfaction)]
 
 
 # ==================== PUBLICATION DE SILVER ====================
@@ -1279,3 +1217,382 @@ def publish(run):
         raise
     finally:
         run.fs.delete(lock, False)
+
+
+# ==================== CONFIGURATION DU PROJET ====================
+# -*- coding: utf-8 -*-
+# Configuration partageable : aucune cle ni donnee personnelle.
+CONFIG = {'bronze_root': '/user/cloudera/chu/bronze',
+ 'keys_root': '/user/cloudera/chu/silver/audit/technical_keys',
+ 'max_communes_driver': 50000,
+ 'output_partitions': {'activite': 8,
+                       'codes_postaux': 2,
+                       'commune': 2,
+                       'consultation': 8,
+                       'deces': 16,
+                       'defunt': 16,
+                       'diagnostic': 2,
+                       'etablissement': 4,
+                       'hospitalisation': 1,
+                       'patient': 4,
+                       'professionnel': 8,
+                       'region': 1,
+                       'satisfaction': 1,
+                       'specialite': 1},
+ 'publication_root': '/user/cloudera/chu/silver',
+ 'region_aliases': {'IDF': 'Ile-de-France', 'PACA': "Provence-Alpes-Cote d'Azur"},
+ 'runs_root': '/user/cloudera/chu/.silver_work/runs',
+ 'shuffle_partitions': 16,
+ 'small_file_limit_bytes': 8388608,
+ 'sources': {'activite': {'delimiter': ';',
+                          'encoding': 'utf-8',
+                          'path': 'etablissements/activite_professionnel_sante.csv',
+                          'required': ['identifiant', 'identifiant_organisation', 'mode_exercice']},
+             'codes_postaux': {'delimiter': ';',
+                               'encoding': 'cp1252',
+                               'path': 'referentiels_geographiques/codes_postaux_laposte_extrait_2026-11-03.csv',
+                               'required': ['#Code_commune_INSEE',
+                                            'Nom_de_la_commune',
+                                            'Code_postal',
+                                            'Libellé_d_acheminement'],
+                               'small': True},
+             'cog_communes': {'delimiter': ',',
+                              'encoding': 'utf-8',
+                              'path': 'referentiels_geographiques/v_commune_2024.csv',
+                              'required': ['TYPECOM', 'COM', 'REG', 'DEP', 'LIBELLE', 'COMPARENT']},
+             'cog_regions': {'delimiter': ',',
+                             'encoding': 'utf-8',
+                             'path': 'referentiels_geographiques/v_region_2024.csv',
+                             'required': ['REG', 'LIBELLE']},
+             'consultation': {'columns': ['Num_consultation',
+                                          'Id_mut',
+                                          'Id_patient',
+                                          'Id_prof_sante',
+                                          'Code_diag',
+                                          'Motif',
+                                          'Date',
+                                          'Heure_debut',
+                                          'Heure_fin'],
+                              'delimiter': ';',
+                              'encoding': 'utf-8',
+                              'header': False,
+                              'path': 'postgres/consultations/consultations.txt'},
+             'deces': {'delimiter': ',',
+                       'encoding': 'utf-8',
+                       'path': 'deces/deces.csv',
+                       'required': ['nom',
+                                    'prenom',
+                                    'sexe',
+                                    'date_naissance',
+                                    'code_lieu_naissance',
+                                    'lieu_naissance',
+                                    'pays_naissance',
+                                    'date_deces',
+                                    'code_lieu_deces',
+                                    'numero_acte_deces']},
+             'diagnostic': {'columns': ['Code_diag', 'Diagnostic'],
+                            'delimiter': ';',
+                            'encoding': 'utf-8',
+                            'header': False,
+                            'path': 'postgres/diagnostic/diagnostic.txt'},
+             'etablissement': {'delimiter': ';',
+                               'encoding': 'utf-8',
+                               'path': 'etablissements/etablissement_sante.csv',
+                               'required': ['identifiant_organisation',
+                                            'raison_sociale_site',
+                                            'finess_site',
+                                            'finess_etablissement_juridique',
+                                            'code_commune',
+                                            'commune',
+                                            'code_postal',
+                                            'adresse',
+                                            'cedex',
+                                            'complement_destinataire',
+                                            'complement_point_geographique',
+                                            'email',
+                                            'enseigne_commerciale_site',
+                                            'indice_repetition_voie',
+                                            'mention_distribution',
+                                            'numero_voie',
+                                            'pays',
+                                            'siren_site',
+                                            'siret_site',
+                                            'telecopie',
+                                            'telephone',
+                                            'telephone_2',
+                                            'type_voie',
+                                            'voie']},
+             'hospitalisation': {'delimiter': ';',
+                                 'encoding': 'utf-8',
+                                 'path': 'csv_sante/Hospitalisations.csv',
+                                 'required': ['Num_Hospitalisation',
+                                              'Id_patient',
+                                              'identifiant_organisation',
+                                              'Code_diagnostic',
+                                              'Suite_diagnostic_consultation',
+                                              'Date_Entree',
+                                              'Jour_Hospitalisation']},
+             'patient': {'columns': ['Id_patient',
+                                     'Nom',
+                                     'Prenom',
+                                     'Sexe',
+                                     'Adresse',
+                                     'Ville',
+                                     'Code_postal',
+                                     'Pays',
+                                     'EMail',
+                                     'Tel',
+                                     'Date',
+                                     'Age',
+                                     'Num_Secu',
+                                     'Groupe_sanguin',
+                                     'Poid',
+                                     'Taille'],
+                         'delimiter': ';',
+                         'encoding': 'utf-8',
+                         'header': False,
+                         'path': 'postgres/patients/patients.txt'},
+             'professionnel': {'columns': ['Identifiant',
+                                           'Civilite',
+                                           'Categorie_professionnelle',
+                                           'Nom',
+                                           'Prenom',
+                                           'Profession',
+                                           'Type_identifiant',
+                                           'Code_specialite'],
+                               'delimiter': ';',
+                               'encoding': 'utf-8',
+                               'header': False,
+                               'path': 'postgres/professionnels/professionnels.txt'},
+             'satisfaction_2017': {'delimiter': ';',
+                                   'encoding': 'cp1252',
+                                   'path': 'satisfaction/2017/ESATIS48H_MCO_recueil2017_donnees.csv',
+                                   'required': ['finess_geo',
+                                                'region',
+                                                'score_all_rea_ajust',
+                                                'nb_rep_score_all_rea_ajust'],
+                                   'small': True},
+             'satisfaction_2019': {'delimiter': ';',
+                                   'encoding': 'cp1252',
+                                   'path': 'satisfaction/2019/resultats-esatis48h-mco-open-data-2019.csv',
+                                   'required': ['finess_geo',
+                                                'region',
+                                                'score_all_rea_ajust',
+                                                'nb_rep_score_all_rea_ajust'],
+                                   'small': True},
+             'satisfaction_2020': {'format': 'xlsx',
+                                   'path': 'satisfaction/2020/resultats-esatis48h-mco-open-data-2020.xlsx',
+                                   'required': ['finess_geo',
+                                                'region',
+                                                'score_all_rea_ajust',
+                                                'nb_rep_score_all_rea_ajust'],
+                                   'sheet': 'Resultats'},
+             'specialite': {'columns': ['Code_specialite', 'Fonction', 'Specialite'],
+                            'delimiter': ';',
+                            'encoding': 'utf-8',
+                            'header': False,
+                            'path': 'postgres/specialites/specialites.txt'}}}
+
+
+# ==================== ENCHAINEMENT DES TROIS PHASES ====================
+import posixpath
+from optparse import OptionParser
+
+CORE_TABLES = set(C.TABLES) - set(['deces', 'defunt'])
+
+def code_digest():
+    result = hashlib.sha256()
+    for name in ('silver_hors_deces.py', 'silver_deces.py', 'silver_controles.py'):
+        result.update(name.encode('ascii'))
+        with open(os.path.join(os.getcwd(), name), 'rb') as stream:
+            result.update(stream.read().replace(b'\r\n', b'\n'))
+    return result.hexdigest()
+
+def validate_setup(config):
+    roots = [config[name] for name in ('bronze_root', 'runs_root', 'keys_root')]
+    for root in roots:
+        if not root.startswith('/') or root == '/' or posixpath.normpath(root) != root:
+            raise ValueError('Utiliser des chemins HDFS absolus normalises, differents de la racine')
+    for i, root in enumerate(roots):
+        for other in roots[i + 1:]:
+            if root == other or root.startswith(other + '/') or other.startswith(root + '/'):
+                raise ValueError('Bronze, sorties et registre doivent etre dans des espaces disjoints')
+
+
+def read_key_and_exclusions(options):
+    with open(options.key_file, 'rb') as stream:
+        key = stream.read(4097)
+    if len(key) < 32 or len(key) > 4096:
+        raise ValueError('Cle HMAC invalide : utiliser un fichier binaire de 32 a 4096 octets')
+    excluded = set()
+    if options.exclude_file:
+        with open(options.exclude_file, 'rb') as stream:
+            for line in stream:
+                value = line.decode('ascii').strip()
+                if not re.match(r'^[0-9a-f]{64}$', value):
+                    raise ValueError('Pseudonyme exclu invalide')
+                excluded.add(value)
+                if len(excluded) > 100000:
+                    raise ValueError('Liste des exclusions trop volumineuse pour cette implementation')
+    return key, excluded
+
+
+def digest(value):
+    serialized = json.dumps(value, sort_keys=True, separators=(',', ':'), ensure_ascii=True)
+    return hashlib.sha256(serialized.encode('ascii')).hexdigest()
+
+
+def key_proof(key):
+    return hmac.new(key, b'CHU-SILVER-CHECKPOINT-KEY-V1', hashlib.sha256).hexdigest()
+
+
+def checkpoint_identity(run):
+    return {'input_id': run.input_id, 'config_digest': digest(run.config),
+            'code_digest': code_digest(), 'key_proof': key_proof(run.key),
+            'key_version': run.key_version, 'excluded_digest': digest(sorted(run.excluded))}
+
+
+def same_identity(expected, actual):
+    for name in ('input_id', 'config_digest', 'code_digest', 'key_proof',
+                 'key_version', 'excluded_digest'):
+        if expected.get(name) != actual.get(name):
+            raise ValueError('Reprise refusee : parametre ou version different : ' + name)
+
+
+def read_json(run, path):
+    target = run.Path(path)
+    if not run.fs.exists(target) or run.fs.getFileStatus(target).getLen() > 8 * 1024 * 1024:
+        raise ValueError('Checkpoint manquant ou trop volumineux : ' + path)
+    reader = run.sc._jvm.java.io.BufferedReader(
+        run.sc._jvm.java.io.InputStreamReader(run.fs.open(target), 'UTF-8'))
+    lines = []
+    try:
+        line = reader.readLine()
+        while line is not None:
+            lines.append(line)
+            line = reader.readLine()
+    finally:
+        reader.close()
+    return json.loads('\n'.join(lines))
+
+
+def attempt_root(run, attempt):
+    if not attempt or not re.match(r'^[a-z0-9_]{1,32}$', attempt):
+        raise ValueError('Identifiant de tentative invalide')
+    if attempt == run.attempt:
+        raise ValueError('Une reprise doit utiliser une nouvelle tentative')
+    return run.config['runs_root'].rstrip('/') + '/' + run.lot + '/' + attempt
+
+
+def validate_outputs(run, outputs, required):
+    if set(outputs) != required:
+        raise ValueError('Tables du checkpoint incompletes ou inattendues')
+    prefix = run.config['runs_root'].rstrip('/') + '/' + run.lot + '/'
+    for name, entry in outputs.items():
+        path = entry.get('path', '')
+        if (not path.startswith(prefix) or posixpath.normpath(path) != path or
+                not run.fs.exists(run.Path(path + '/_SUCCESS'))):
+            raise ValueError('Sortie absente ou hors du lot : ' + name)
+        actual = [(f.name, f.dataType.simpleString()) for f in run.sql.read.orc(path).schema.fields]
+        expected = [(f.name, f.dataType.simpleString()) for f in C.schema(C.TABLES[name]).fields]
+        if actual != expected:
+            raise ValueError('Schema incompatible : ' + name)
+
+
+def saved_checkpoint(run, attempt, stage):
+    root = attempt_root(run, attempt)
+    state = read_json(run, root + '/audit/checkpoint_' + stage + '.json')
+    if state.get('stage') != stage or state.get('attempt') != attempt or state.get('lot') != run.lot:
+        raise ValueError('Checkpoint incoherent')
+    same_identity(state['identity'], checkpoint_identity(run))
+    expected = CORE_TABLES if stage == '01' else set(C.TABLES)
+    validate_outputs(run, state['outputs'], expected)
+    return state
+
+
+def write_checkpoint(run, stage, source_attempt):
+    validate_outputs(run, run.outputs, CORE_TABLES if stage == '01' else set(C.TABLES))
+    state = {'stage': stage, 'lot': run.lot, 'attempt': run.attempt,
+             'source_attempt': source_attempt, 'identity': checkpoint_identity(run), 'outputs': run.outputs,
+             'metrics': run.metrics}
+    run.write_json('checkpoint_' + stage + '.json', state)
+    print('SILVER_CHECKPOINT_' + stage + ' : ' + run.audit)
+
+
+def phase_main(stage):
+    parser = OptionParser()
+    parser.add_option('--lot-id', dest='lot')
+    parser.add_option('--attempt-id', dest='attempt')
+    parser.add_option('--source-attempt', dest='source_attempt')
+    parser.add_option('--hmac-key-file', dest='key_file')
+    parser.add_option('--key-version', dest='key_version')
+    parser.add_option('--exclude-pseudonyms-file', dest='exclude_file')
+    options, extra = parser.parse_args()
+    if extra or not all([options.lot, options.attempt, options.key_file, options.key_version]):
+        parser.error('lot-id, attempt-id, hmac-key-file et key-version sont obligatoires')
+    for value in (options.lot, options.attempt):
+        if not re.match(r'^[a-z0-9_]{1,32}$', value):
+            parser.error('Identifiant invalide : utiliser a-z, 0-9 et _')
+    if (stage == '01' and options.source_attempt) or (stage != '01' and not options.source_attempt):
+        parser.error('source-attempt est requis uniquement pour les phases 02 et 03')
+    config = CONFIG
+    validate_setup(config)
+    key, excluded = read_key_and_exclusions(options)
+    from pyspark import SparkConf, SparkContext
+    from pyspark.sql import HiveContext
+    conf = SparkConf().setAppName('CHU_Silver_%s_%s' % (stage, options.lot))
+    conf.set('spark.sql.shuffle.partitions', str(config.get('shuffle_partitions', 16)))
+    conf.set('spark.hadoop.orc.compress', 'SNAPPY')
+    conf.set('spark.sql.orc.filterPushdown', 'true')
+    sc = SparkContext(conf=conf)
+    run = None
+    try:
+        if sc.version.split('.')[:2] != ['1', '6']:
+            raise ValueError('Cette livraison cible Spark 1.6')
+        sc.setLogLevel('WARN')
+        sql = HiveContext(sc)
+        expected = rules.pseudonym('42', key)
+        if sc.parallelize(['42'], 1).map(lambda x: rules.pseudonym(x, key)).collect() != [expected]:
+            raise ValueError('Test HMAC driver/worker non concordant')
+        run = Run(sc, sql, config, options.lot, options.attempt, key, options.key_version, excluded)
+        if stage == '01':
+            for step, function in PIPELINES:
+                print('SILVER_STEP_START ' + step)
+                function(run)
+                run.write_json('progression_' + step + '.json', {'step': step, 'outputs': run.outputs, 'metrics': run.metrics})
+                print('SILVER_STEP_OK ' + step)
+            write_checkpoint(run, '01', None)
+        elif stage == '02':
+            state = saved_checkpoint(run, options.source_attempt, '01')
+            run.outputs, run.metrics = state['outputs'], state['metrics']
+            from silver_deces import deces
+            print('SILVER_STEP_START 07')
+            deces(run)
+            run.write_json('progression_07.json', {'step': '07', 'outputs': run.outputs, 'metrics': run.metrics})
+            print('SILVER_STEP_OK 07')
+            write_checkpoint(run, '02', options.source_attempt)
+        elif stage == '03':
+            state = saved_checkpoint(run, options.source_attempt, '02')
+            run.outputs, run.metrics = state['outputs'], state['metrics']
+            run.write_json('lineage.json', {'phase_02': options.source_attempt, 'phase_01': state.get('source_attempt')})
+            from pyspark.sql import functions as F
+            for table in ('professionnel', 'consultation', 'activite'):
+                invalid = (F.col('id_prof_sante').isNull() | ~F.col('id_prof_sante').rlike('^[0-9a-f]{64}$'))
+                if run.load(table).filter(invalid).limit(1).count():
+                    raise ValueError('Pseudonyme professionnel invalide : ' + table)
+            run.complete()
+        else:
+            raise ValueError('Phase inconnue')
+    except Exception:
+        if run is not None:
+            try:
+                run.write_json('ECHEC.json', {'status': 'FAILED', 'exception_type': sys.exc_info()[0].__name__})
+            except Exception:
+                pass
+        raise
+    finally:
+        sc.stop()
+
+if __name__ == '__main__':
+    import silver_hors_deces
+    silver_hors_deces.phase_main('01')
