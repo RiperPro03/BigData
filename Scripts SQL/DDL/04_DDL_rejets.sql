@@ -14,7 +14,7 @@ CREATE EXTERNAL TABLE IF NOT EXISTS rejets_fait_consultation (
     horodatage STRING
 )
 STORED AS ORC
-LOCATION '/gold/rejets_fait_consultation';
+LOCATION '/user/cloudera/chu/gold/rejets/rejets_fait_consultation';
 
 CREATE EXTERNAL TABLE IF NOT EXISTS rejets_fait_hospitalisation (
     num_hospitalisation STRING,
@@ -26,7 +26,7 @@ CREATE EXTERNAL TABLE IF NOT EXISTS rejets_fait_hospitalisation (
     horodatage STRING
 )
 STORED AS ORC
-LOCATION '/gold/rejets_fait_hospitalisation';
+LOCATION '/user/cloudera/chu/gold/rejets/rejets_fait_hospitalisation';
 
 -- SATISFACTION
 
@@ -40,7 +40,7 @@ CREATE EXTERNAL TABLE IF NOT EXISTS rejets_fait_satisfaction (
     horodatage STRING
 )
 STORED AS ORC
-LOCATION '/gold/rejets_fait_satisfaction';
+LOCATION '/user/cloudera/chu/gold/rejets/rejets_fait_satisfaction';
 
 -- DECES
 
@@ -49,9 +49,8 @@ CREATE EXTERNAL TABLE IF NOT EXISTS rejets_fait_deces (
     date_deces STRING,
     code_commune_deces STRING,
     defunt_key STRING,
-    numero_acte_deces STRING,
     motif STRING,
     horodatage STRING
 )
 STORED AS ORC
-LOCATION '/gold/rejets_fait_deces';
+LOCATION '/user/cloudera/chu/gold/rejets/rejets_fait_deces';

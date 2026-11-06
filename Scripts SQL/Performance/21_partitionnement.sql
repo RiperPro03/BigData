@@ -1,3 +1,4 @@
+-- Optionnel : executer apres validation du Gold de reference et mesure initiale.
 USE gold;
 
 -- Autorise Hive à créer les partitions automatiquement à l'insertion
@@ -19,7 +20,7 @@ CREATE EXTERNAL TABLE IF NOT EXISTS fait_consultation_part (
 )
 PARTITIONED BY (annee_consultation SMALLINT)
 STORED AS ORC
-LOCATION '/gold/fait_consultation_part';
+LOCATION '/user/cloudera/chu/gold/tables/fait_consultation_part';
 
 INSERT OVERWRITE TABLE fait_consultation_part PARTITION (annee_consultation)
 SELECT num_consultation, date_consultation, id_patient, code_diag, id_prof_sante,
@@ -40,7 +41,7 @@ CREATE EXTERNAL TABLE IF NOT EXISTS fait_hospitalisation_part (
 )
 PARTITIONED BY (annee_hospitalisation SMALLINT)
 STORED AS ORC
-LOCATION '/gold/fait_hospitalisation_part';
+LOCATION '/user/cloudera/chu/gold/tables/fait_hospitalisation_part';
 
 INSERT OVERWRITE TABLE fait_hospitalisation_part PARTITION (annee_hospitalisation)
 SELECT num_hospitalisation, date_entree, id_patient, code_diag, identifiant_organisation,
@@ -54,15 +55,14 @@ CREATE EXTERNAL TABLE IF NOT EXISTS fait_deces_part (
     deces_key          INT,
     date_deces         DATE,
     code_commune_deces STRING,
-    defunt_key         INT,
-    numero_acte_deces  STRING
+    defunt_key         INT
 )
 PARTITIONED BY (annee_deces SMALLINT)
 STORED AS ORC
-LOCATION '/gold/fait_deces_part';
+LOCATION '/user/cloudera/chu/gold/tables/fait_deces_part';
 
 INSERT OVERWRITE TABLE fait_deces_part PARTITION (annee_deces)
-SELECT deces_key, date_deces, code_commune_deces, defunt_key, numero_acte_deces,
+SELECT deces_key, date_deces, code_commune_deces, defunt_key,
        CAST(year(date_deces) AS SMALLINT) AS annee_deces
 FROM fait_deces
 DISTRIBUTE BY year(date_deces);

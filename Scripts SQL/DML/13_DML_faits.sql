@@ -13,7 +13,7 @@ FROM (
            patient.id_patient          AS patient_trouve,
            diagnostic.code_diag        AS diagnostic_trouve,
            professionnel.id_prof_sante AS professionnel_trouve
-    FROM silver.s1_consultation consultation
+    FROM silver.consultation consultation
     LEFT JOIN dim_temps calendrier
            ON calendrier.`date`           = consultation.date_consultation
     LEFT JOIN dim_patient patient
@@ -70,7 +70,7 @@ FROM (
            patient.id_patient AS patient_trouve,
            diagnostic.code_diag AS diagnostic_trouve,
            etablissement.identifiant_organisation AS etablissement_trouve
-    FROM silver.s2_hospitalisation hospitalisation
+    FROM silver.hospitalisation hospitalisation
     LEFT JOIN dim_temps calendrier
            ON calendrier.`date` = hospitalisation.date_entree
     LEFT JOIN dim_patient patient
@@ -120,10 +120,12 @@ FROM (
            deces.date_deces,
            deces.code_commune_deces,
            deces.defunt_key,
-           deces.numero_acte_deces,
            calendrier_deces.`date` AS date_trouvee,
-           lieu.code_commune_insee AS lieu_trouve
-    FROM silver.s4_deces deces
+           lieu.code_commune_insee AS lieu_trouve,
+           defunt.defunt_key AS defunt_trouve
+    FROM silver.deces deces
+    LEFT JOIN dim_defunt defunt
+           ON defunt.defunt_key = deces.defunt_key
     LEFT JOIN dim_temps_deces calendrier_deces
            ON calendrier_deces.`date` = deces.date_deces
     LEFT JOIN dim_lieu_deces lieu
@@ -134,10 +136,10 @@ INSERT OVERWRITE TABLE fait_deces
 SELECT controle_cles.deces_key,
        controle_cles.date_deces,
        controle_cles.code_commune_deces,
-       controle_cles.defunt_key,
-       controle_cles.numero_acte_deces
+       controle_cles.defunt_key
 WHERE controle_cles.deces_key IS NOT NULL
   AND controle_cles.defunt_key IS NOT NULL
+  AND controle_cles.defunt_trouve IS NOT NULL
   AND controle_cles.date_trouvee IS NOT NULL
   AND controle_cles.lieu_trouve IS NOT NULL
 
@@ -146,22 +148,22 @@ SELECT CAST(controle_cles.deces_key  AS STRING),
        CAST(controle_cles.date_deces AS STRING),
        controle_cles.code_commune_deces,
        CAST(controle_cles.defunt_key AS STRING),
-       controle_cles.numero_acte_deces,
        concat_ws(', ',
            CASE WHEN controle_cles.deces_key IS NULL THEN 'deces_key absent' END,
-           CASE WHEN controle_cles.defunt_key IS NULL THEN 'defunt_key absent' END,
+           CASE WHEN controle_cles.defunt_key IS NULL OR controle_cles.defunt_trouve IS NULL THEN 'defunt absent de dim_defunt' END,
            CASE WHEN controle_cles.date_trouvee IS NULL THEN 'date absente de dim_temps_deces' END,
            CASE WHEN controle_cles.lieu_trouve IS NULL THEN 'lieu absent de dim_lieu_deces' END),
        from_unixtime(unix_timestamp())
 WHERE controle_cles.deces_key IS NULL
    OR controle_cles.defunt_key IS NULL
+   OR controle_cles.defunt_trouve IS NULL
    OR controle_cles.date_trouvee IS NULL
    OR controle_cles.lieu_trouve IS NULL;
 
 -- SATISFACTION
 
 FROM (
-    SELECT concat('F', satisfaction.finess_geo) AS identifiant_organisation,
+    SELECT satisfaction.identifiant_organisation,
            satisfaction.finess_geo,
            satisfaction.annee,
            satisfaction.region,
@@ -169,7 +171,7 @@ FROM (
            satisfaction.nb_rep_score_all_rea_ajust,
            annees.annee AS annee_trouvee,
            regions.region AS region_trouvee
-    FROM silver.s3_satisfaction satisfaction
+    FROM silver.satisfaction satisfaction
     LEFT JOIN dim_temps_satisfaction annees
            ON annees.annee   = satisfaction.annee
     LEFT JOIN dim_region regions

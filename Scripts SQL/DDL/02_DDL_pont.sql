@@ -1,4 +1,4 @@
-CREATE DATABASE IF NOT EXISTS gold;
+CREATE DATABASE IF NOT EXISTS gold LOCATION '/user/cloudera/chu/gold';
 USE gold;
 
 -- CONSTELLATION
@@ -11,4 +11,4 @@ CREATE EXTERNAL TABLE IF NOT EXISTS pont_activite_pro (
     mode_exercice STRING
 )
 STORED AS ORC
-LOCATION '/gold/pont_activite_pro';
+LOCATION '/user/cloudera/chu/gold/tables/pont_activite_pro';

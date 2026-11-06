@@ -1,3 +1,4 @@
+-- Optionnel : executer apres validation du Gold de reference et mesure initiale.
 USE gold;
 
 -- NOTIONS
@@ -13,31 +14,26 @@ SET hive.enforce.sorting=true;
 
 CREATE EXTERNAL TABLE IF NOT EXISTS dim_defunt_bucket (
     defunt_key          INT,
-    sexe                STRING,
-    date_naissance      DATE,
-    code_lieu_naissance STRING,
-    lieu_naissance      STRING,
-    pays_naissance      STRING
+    sexe                STRING
 )
 CLUSTERED BY (defunt_key) SORTED BY (defunt_key) INTO 16 BUCKETS
 STORED AS ORC
-LOCATION '/gold/dim_defunt_bucket';
+LOCATION '/user/cloudera/chu/gold/tables/dim_defunt_bucket';
 
 INSERT OVERWRITE TABLE dim_defunt_bucket
-SELECT defunt_key, sexe, date_naissance, code_lieu_naissance, lieu_naissance, pays_naissance
+SELECT defunt_key, sexe
 FROM dim_defunt;
 
 CREATE EXTERNAL TABLE IF NOT EXISTS fait_deces_bucket (
     deces_key          INT,
     date_deces         DATE,
     code_commune_deces STRING,
-    defunt_key         INT,
-    numero_acte_deces  STRING
+    defunt_key         INT
 )
 CLUSTERED BY (defunt_key) SORTED BY (defunt_key) INTO 16 BUCKETS
 STORED AS ORC
-LOCATION '/gold/fait_deces_bucket';
+LOCATION '/user/cloudera/chu/gold/tables/fait_deces_bucket';
 
 INSERT OVERWRITE TABLE fait_deces_bucket
-SELECT deces_key, date_deces, code_commune_deces, defunt_key, numero_acte_deces
+SELECT deces_key, date_deces, code_commune_deces, defunt_key
 FROM fait_deces;

@@ -1,4 +1,4 @@
-CREATE DATABASE IF NOT EXISTS gold;
+CREATE DATABASE IF NOT EXISTS gold LOCATION '/user/cloudera/chu/gold';
 USE gold;
 
 -- ORC = Optimized Row Columnar, format de stockage en colonnes, optimisé pour les requêtes analytiques.
@@ -12,22 +12,22 @@ CREATE EXTERNAL TABLE IF NOT EXISTS dim_temps (
     jour SMALLINT
 )
 STORED AS ORC
-LOCATION '/gold/dim_temps';
+LOCATION '/user/cloudera/chu/gold/tables/dim_temps';
 
 CREATE EXTERNAL TABLE IF NOT EXISTS dim_patient (
-    id_patient INT,
+    id_patient STRING,
     sexe STRING,
     age INT
 )
 STORED AS ORC
-LOCATION '/gold/dim_patient';
+LOCATION '/user/cloudera/chu/gold/tables/dim_patient';
 
 CREATE EXTERNAL TABLE IF NOT EXISTS dim_diagnostic (
     code_diag STRING,
     libelle STRING
 )
 STORED AS ORC
-LOCATION '/gold/dim_diagnostic';
+LOCATION '/user/cloudera/chu/gold/tables/dim_diagnostic';
 
 CREATE EXTERNAL TABLE IF NOT EXISTS dim_etablissement (
     identifiant_organisation STRING,
@@ -39,7 +39,7 @@ CREATE EXTERNAL TABLE IF NOT EXISTS dim_etablissement (
     code_postal STRING
 )
 STORED AS ORC
-LOCATION '/gold/dim_etablissement';
+LOCATION '/user/cloudera/chu/gold/tables/dim_etablissement';
 
 CREATE EXTERNAL TABLE IF NOT EXISTS dim_professionnel (
     id_prof_sante STRING,
@@ -48,7 +48,7 @@ CREATE EXTERNAL TABLE IF NOT EXISTS dim_professionnel (
     specialite STRING
 )
 STORED AS ORC
-LOCATION '/gold/dim_professionnel';
+LOCATION '/user/cloudera/chu/gold/tables/dim_professionnel';
 
 -- SATISFACTION
 
@@ -56,13 +56,13 @@ CREATE EXTERNAL TABLE IF NOT EXISTS dim_temps_satisfaction (
     annee SMALLINT
 )
 STORED AS ORC
-LOCATION '/gold/dim_temps_satisfaction';
+LOCATION '/user/cloudera/chu/gold/tables/dim_temps_satisfaction';
 
 CREATE EXTERNAL TABLE IF NOT EXISTS dim_region (
     region STRING
 )
 STORED AS ORC
-LOCATION '/gold/dim_region';
+LOCATION '/user/cloudera/chu/gold/tables/dim_region';
 
 -- DECES
 CREATE EXTERNAL TABLE IF NOT EXISTS dim_temps_deces (
@@ -72,25 +72,24 @@ CREATE EXTERNAL TABLE IF NOT EXISTS dim_temps_deces (
     jour SMALLINT
 )
 STORED AS ORC
-LOCATION '/gold/dim_temps_deces';
+LOCATION '/user/cloudera/chu/gold/tables/dim_temps_deces';
 
 CREATE EXTERNAL TABLE IF NOT EXISTS dim_defunt (
     defunt_key INT,
-    sexe STRING,
-    date_naissance DATE,
-    code_lieu_naissance STRING,
-    lieu_naissance STRING,
-    pays_naissance STRING
+    sexe STRING
 )
 STORED AS ORC
-LOCATION '/gold/dim_defunt';
+LOCATION '/user/cloudera/chu/gold/tables/dim_defunt';
 
 CREATE EXTERNAL TABLE IF NOT EXISTS dim_lieu_deces (
     code_commune_insee STRING,
     nom_de_la_commune STRING,
     code_postal STRING,
     libelle_d_acheminement STRING,
-    code_departement STRING
+    code_departement STRING,
+    code_region STRING,
+    libelle_region STRING,
+    categorie_localisation STRING
 )
 STORED AS ORC
-LOCATION '/gold/dim_lieu_deces';
+LOCATION '/user/cloudera/chu/gold/tables/dim_lieu_deces';
