@@ -4,6 +4,9 @@ USE gold;
 -- Ressources de session : noeud YARN de 4096 Mio, conteneur maximal de 3072 Mio.
 -- Aucun changement de la configuration globale du cluster.
 SET hive.execution.engine=mr;
+-- Evite la preparation locale des map joins, forcee a 50 Mio par cet environnement.
+-- Les jointures distribuees conservent les memes lignes et les memes controles.
+SET hive.auto.convert.join=false;
 SET mapreduce.map.memory.mb=1024;
 SET mapreduce.map.java.opts=-Xmx768m -Djava.net.preferIPv4Stack=true;
 SET mapreduce.reduce.memory.mb=1536;

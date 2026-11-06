@@ -29,6 +29,10 @@ Les DML, controles et variantes utilisent MapReduce avec des conteneurs map de
 reducers et leur demarrage apres la fin des maps. Ces parametres sont adaptes
 au noeud YARN de 4096 Mio ; les valeurs par defaut de la VM etaient de 128 Mio
 par conteneur avec un heap de 50 Mio. Chaque script definit sa propre session.
+La conversion automatique en map join est desactivee : le processus local de
+preparation des tables de hachage restait force a 50 Mio dans cette VM, meme avec
+hive.mapred.local.mem=768. Les jointures distribuees utilisent les ressources
+MapReduce definies ci-dessus. Cela change le plan d'execution, pas les resultats.
 Aucun parametre global du cluster n'est modifie. Conserver ces valeurs dans les
 mesures de performance pour comparer des configurations identiques.
 
