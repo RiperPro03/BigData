@@ -1,5 +1,16 @@
 USE gold;
 
+-- Ressources de session : noeud YARN de 4096 Mio, conteneur maximal de 3072 Mio.
+-- Aucun changement de la configuration globale du cluster.
+SET hive.execution.engine=mr;
+SET mapreduce.map.memory.mb=1024;
+SET mapreduce.map.java.opts=-Xmx768m -Djava.net.preferIPv4Stack=true;
+SET mapreduce.reduce.memory.mb=1536;
+SET mapreduce.reduce.java.opts=-Xmx1024m -Djava.net.preferIPv4Stack=true;
+SET mapreduce.job.reduce.slowstart.completedmaps=1.0;
+SET hive.exec.reducers.max=8;
+
+
 -- CONSULTATION
 
 FROM (

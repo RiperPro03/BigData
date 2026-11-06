@@ -22,6 +22,16 @@ Les tables lisent le Silver publie dans `silver.*` et utilisent :
 - Rejets d'activite Silver conserves. Les professionnels sans site valide rejoignent le site `inconnu` dans le pont.
 - Ponderation des consultations par etablissement et satisfaction calculees dans Power BI.
 
+## Ressources de session
+
+Les DML, controles et variantes utilisent MapReduce avec des conteneurs map de
+1024 Mio (heap Java 768 Mio), reduce de 1536 Mio (heap 1024 Mio), au plus huit
+reducers et leur demarrage apres la fin des maps. Ces parametres sont adaptes
+au noeud YARN de 4096 Mio ; les valeurs par defaut de la VM etaient de 128 Mio
+par conteneur avec un heap de 50 Mio. Chaque script definit sa propre session.
+Aucun parametre global du cluster n'est modifie. Conserver ces valeurs dans les
+mesures de performance pour comparer des configurations identiques.
+
 ## Ordre manuel
 
 Une seule alimentation a la fois. Le Silver doit etre publie et rester stable
