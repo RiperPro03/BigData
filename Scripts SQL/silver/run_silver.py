@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-"""spark-submit --py-files chu_silver.zip run_silver.py --config ...
+"""spark-submit --py-files transformations.py run_silver.py --config ...
 
 Ne depend ni de SparkSession, ni d'argparse, ni de pandas, ni de Python 3.
 """
@@ -22,9 +22,6 @@ def arguments():
     parser.add_option('--hmac-key-file', dest='key_file', help='Fichier binaire local, jamais sa valeur')
     parser.add_option('--key-version', dest='key_version', help='Version logique publique de la cle')
     parser.add_option('--exclude-pseudonyms-file', dest='exclude_file', help='Liste locale des HMAC exclus, un par ligne')
-    parser.add_option('--until', dest='until', default='08', help='Arret apres 01..08 (08 = complet)')
-    parser.add_option('--source-attempt', dest='source_attempt', help='Tentative achevee de la phase precedente')
-    parser.add_option('--legacy-attempt', dest='legacy_attempt', help='Import explicite du lot historique documente')
     options, positional = parser.parse_args()
     if positional or not all([options.config, options.lot, options.key_file, options.key_version]):
         parser.error('--config, --lot-id, --hmac-key-file et --key-version sont obligatoires')
@@ -33,8 +30,6 @@ def arguments():
     options.attempt = options.attempt or ('a' + datetime.datetime.utcnow().strftime('%Y%m%d%H%M%S') + uuid.uuid4().hex[:6])
     if not re.match(r'^[a-z0-9_]{1,32}$', options.attempt):
         parser.error('attempt-id invalide')
-    if options.until not in ['01', '02', '03', '04', '05', '06', '07', '08']:
-        parser.error('until doit etre entre 01 et 08')
     return options
 
 
@@ -80,16 +75,12 @@ def read_key_and_exclusions(options):
 
 def main():
     options = arguments()
-    if options.source_attempt or options.legacy_attempt:
-        raise ValueError('Utiliser les trois lanceurs Silver pour une reprise par phase')
     config = load_config(options.config)
     validate_setup(config)
     key, excluded = read_key_and_exclusions(options)
     from pyspark import SparkConf, SparkContext
     from pyspark.sql import HiveContext
-    from chu_silver.runtime import Run
-    from chu_silver.pipelines import PIPELINES
-    from chu_silver.rules import pseudonym
+    from transformations import Run, PIPELINES, pseudonym
     conf = SparkConf().setAppName('CHU_Silver_' + options.lot)
     conf.set('spark.sql.shuffle.partitions', str(config.get('shuffle_partitions', 16)))
     conf.set('spark.hadoop.orc.compress', 'SNAPPY')
@@ -108,18 +99,11 @@ def main():
             raise ValueError('Test HMAC driver/worker non concordant')
         run = Run(sc, sql, config, options.lot, options.attempt, key, options.key_version, excluded)
         for step, function in PIPELINES:
-            if step > options.until:
-                break
             print('SILVER_STEP_START ' + step)
             function(run)
             run.write_json('progression_' + step + '.json', {'step': step, 'outputs': run.outputs, 'metrics': run.metrics})
             print('SILVER_STEP_OK ' + step)
-        if options.until == '08':
-            run.complete()
-        else:
-            run.write_json('rapport_partiel.json', {'status': 'PARTIAL_NOT_PUBLISHED', 'until': options.until,
-                            'outputs': run.outputs, 'metrics': run.metrics})
-            print('SILVER_PARTIAL : ' + run.audit)
+        run.complete()
     except Exception:
         if run is not None:
             # Ne pas serialiser la valeur d'une exception contenant des donnees.
