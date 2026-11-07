@@ -51,3 +51,22 @@ se trouvent dans `../Performance/Benchmarks/` : ces requetes metier seules ne
 constituent pas une preuve de gain ou de respect de la limite de deux minutes.
 Si Gold est recharge, reconstruire les variantes et l'index avant de refaire
 une comparaison de performance.
+
+## Verification sur la VM le 7 novembre 2026
+
+Les huit requetes ont ete executees avec succes sur Hive 1.1. Les nombres de
+consultations, hospitalisations et deces ont ete rapproches de comptages
+independants des tables Gold. Pour la periode d'exemple :
+
+- consultations 2021 : 145 883 ; le total attribue aux sites est egal a ce
+  total a la precision pres de l'arrondi sur les lignes ;
+- hospitalisations 2017 : 458 sejours pour 458 patients distincts ;
+- deces 2019 : 620 608, dont 7 274 sans region francaise rattachee ;
+- satisfaction 2020 : 837 sites avec score et nombre de reponses exploitables,
+  sur 1 150 sites dans Gold ; 330 224 reponses prises en compte.
+
+La satisfaction 2020 produit notamment le groupe `Ocean Indien`, tandis que
+les deces utilisent des regions INSEE distinctes. Eviter de joindre ces deux
+libelles sans verifier la correspondance et la granularite des sources.
+Les executions ont ete mesurees une fois avec lancement Beeline inclus ; elles
+ne remplacent pas les mesures repetees avant/apres optimisation du livrable.

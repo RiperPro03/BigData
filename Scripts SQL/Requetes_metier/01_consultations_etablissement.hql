@@ -8,7 +8,7 @@ WITH sites AS (
     FROM gold.pont_activite_pro
 ), mesures AS (
     SELECT s.identifiant_organisation,
-           SUM(1.0 / s.nombre_sites) AS consultations_ponderees,
+           SUM(CAST(1.0 AS DOUBLE) / s.nombre_sites) AS consultations_ponderees,
            COUNT(DISTINCT c.id_patient) AS patients_distincts
     FROM gold.fait_consultation c
     JOIN sites s ON c.id_prof_sante = s.id_prof_sante
@@ -17,7 +17,7 @@ WITH sites AS (
     GROUP BY s.identifiant_organisation
 )
 SELECT identifiant_organisation,
-       ROUND(consultations_ponderees, 4) AS consultations_ponderees,
+       ROUND(consultations_ponderees, 8) AS consultations_ponderees,
        patients_distincts,
        CASE WHEN patients_distincts > 0
             THEN ROUND(consultations_ponderees / patients_distincts, 4)
