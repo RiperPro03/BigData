@@ -1,3 +1,5 @@
+**/.pbi/localSettings.json
+**/.pbi/cache.abf
 
 # Artifacts locaux Silver
 Scripts SQL/silver/__pycache__/
@@ -17,3 +19,6 @@ Scripts SQL/silver/logs/
 *.exit
 Scripts SQL/silver/data/
 Scripts SQL/silver/rejets/
+
+# Power BI (partagé via SwissTransfer, trop lourd pour GitHub)
+*.pbix
