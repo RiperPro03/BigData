@@ -1,4 +1,4 @@
-# Gold : scripts finaux et lancement manuel
+# Gold : scripts finaux et alimentation
 
 Les tables lisent le Silver publie dans `silver.*` et utilisent :
 
@@ -36,12 +36,20 @@ MapReduce definies ci-dessus. Cela change le plan d'execution, pas les resultats
 Aucun parametre global du cluster n'est modifie. Conserver ces valeurs dans les
 mesures de performance pour comparer des configurations identiques.
 
+## Alimentation automatique
+
+Le lanceur `Gold/pipeline_gold.py` prépare les tables dans une zone isolée,
+exécute les contrôles puis publie le résultat et le rapport qualité si la
+validation réussit. Pour enchaîner Silver puis Gold et connaître les conditions
+de reprise, consulter [Qualite/README.md](Qualite/README.md).
+
 ## Ordre manuel
 
 Une seule alimentation a la fois. Le Silver doit etre publie et rester stable
 pendant le chargement. Suspendre l'actualisation BI jusqu'a validation finale :
 les INSERT OVERWRITE de plusieurs tables ne sont pas une transaction commune.
-Aucun lancement automatique n'est fourni.
+Cet ordre manuel est une alternative au lanceur automatique : il écrit
+directement dans les tables Gold et n'offre pas sa publication contrôlée.
 
 Executer les fichiers dans cet ordre, en s'arretant a la premiere erreur :
 
