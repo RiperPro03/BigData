@@ -124,6 +124,22 @@ from zipfile import ZipFile
 PY2 = sys.version_info[0] == 2
 
 
+def clean(value):
+    """Normalise les en-tetes comme les regles Silver historiques."""
+    if value is None:
+        return None
+    try:
+        text_type = unicode
+    except NameError:
+        text_type = str
+    if not isinstance(value, text_type):
+        if isinstance(value, bytes):
+            value = value.decode('utf-8')
+        else:
+            value = text_type(value)
+    return value.strip().lstrip(u'\ufeff') or None
+
+
 def csv_records(text, delimiter):
     # json.loads renvoie unicode en Python 2.6, mais _csv exige un byte str.
     if PY2:
