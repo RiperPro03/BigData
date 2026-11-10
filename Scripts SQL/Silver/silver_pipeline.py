@@ -1062,7 +1062,7 @@ def main():
     files = 'silver_pipeline.py,silver_hors_deces.py,silver_deces.py,silver_controles.py'
     base = ['spark-submit', '--master', 'yarn', '--deploy-mode', 'client',
             '--driver-memory', '1g', '--executor-memory', '1536m',
-            '--executor-cores', '2', '--num-executors', '1',
+            '--executor-cores', '1', '--num-executors', '1',
             '--conf', 'spark.dynamicAllocation.enabled=false',
             '--conf', 'spark.yarn.executor.memoryOverhead=1024', '--py-files', files]
     phases = [('silver_hors_deces.py', 'h_' + run_id, None),
