@@ -18,7 +18,7 @@ Le contrôle final ajoute au rapport JSON le nombre de lignes de satisfaction av
 Copier les quatre fichiers dans un même dossier **sans espace** sur la VM. Par exemple :
 
 ```bash
-cd /home/cloudera/chu_silver_v2
+cd /home/cloudera/chu_silver
 python silver_pipeline.py \
   --lot-id lot_20261110 \
   --hmac-key-file /home/cloudera/.chu/hmac-test.key \

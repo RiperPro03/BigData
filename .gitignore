@@ -2,23 +2,23 @@
 **/.pbi/cache.abf
 
 # Artifacts locaux Silver
-Scripts SQL/silver/__pycache__/
+Scripts SQL/Silver/__pycache__/
 *.pyc
 *.pyo
 *.key
 *.pem
-Scripts SQL/silver/config/local*.json
-Scripts SQL/silver/config/exclusions*
-Scripts SQL/silver/chu_silver.zip
-Scripts SQL/silver/spark-warehouse/
-Scripts SQL/silver/metastore_db/
-Scripts SQL/silver/derby.log
-Scripts SQL/silver/artifacts/
-Scripts SQL/silver/logs/
+Scripts SQL/Silver/config/local*.json
+Scripts SQL/Silver/config/exclusions*
+Scripts SQL/Silver/chu_silver.zip
+Scripts SQL/Silver/spark-warehouse/
+Scripts SQL/Silver/metastore_db/
+Scripts SQL/Silver/derby.log
+Scripts SQL/Silver/artifacts/
+Scripts SQL/Silver/logs/
 *.log
 *.exit
-Scripts SQL/silver/data/
-Scripts SQL/silver/rejets/
+Scripts SQL/Silver/data/
+Scripts SQL/Silver/rejets/
 
 # Power BI (partagé via SwissTransfer, trop lourd pour GitHub)
 *.pbix
