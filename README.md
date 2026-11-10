@@ -80,7 +80,7 @@ La couche Gold comprend une **constellation de faits** pour les consultations et
 
 Deux tables de faits partagent les mêmes dimensions.
 
-![Schéma Gold : constellation de faits](Christopher/MLD%20-%20Conception/schema-gold-constellation.jpg)
+![Schéma Gold : constellation de faits](Architecture/Modelisation/MLD/schema-gold-constellation.jpg)
 
 - **Faits :** `fait_consultation` et `fait_hospitalisation`.
 - **Dimensions :** `dim_temps`, `dim_patient` (pseudonymisé, sans nom ni adresse), `dim_diagnostic`, `dim_professionnel`, `dim_etablissement`.
@@ -89,7 +89,7 @@ Deux tables de faits partagent les mêmes dimensions.
 
 ### Décès : schéma en étoile
 
-![Schéma Gold : étoile des décès](Christopher/MLD%20-%20Conception/schema-gold-deces.jpg)
+![Schéma Gold : étoile des décès](Architecture/Modelisation/MLD/schema-gold-deces.jpg)
 
 - **Fait :** `fait_deces`, une ligne par décès, avec la date, la commune et le numéro d'acte de décès.
 - **Dimensions :** `dim_temps_deces`, `dim_lieu_deces` et `dim_defunt`.
@@ -97,7 +97,7 @@ Deux tables de faits partagent les mêmes dimensions.
 
 ### Satisfaction : schéma en étoile
 
-![Schéma Gold : étoile de la satisfaction](Christopher/MLD%20-%20Conception/schema-gold-satisfaction.jpg)
+![Schéma Gold : étoile de la satisfaction](Architecture/Modelisation/MLD/schema-gold-satisfaction.jpg)
 
 - **Fait :** `fait_satisfaction`, une ligne par établissement et par année, identifiée par le couple (`finess`, `annee`).
 - **Dimensions :** `dim_temps_satisfaction` et `dim_etablissement_satisfaction`, qui porte notamment la région.
