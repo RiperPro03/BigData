@@ -44,7 +44,7 @@ Analyses attendues :
 
 Les données suivent un parcours de bout en bout : **sources → ETL → stockage en trois couches → BI**.
 
-![Architecture globale](Christopher/Architecture/architecture-cible.svg)
+![Architecture globale](Architecture/architecture-cible.jpg)
 
 | Étape | Technologie | Rôle |
 |---|---|---|
