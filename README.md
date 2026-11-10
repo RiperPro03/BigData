@@ -58,7 +58,7 @@ PostgreSQL est une source de l'architecture, jamais la cible.
 
 Les données montent en qualité par étapes, sans jamais écraser les fichiers d'origine.
 
-![Architecture en médaillon](Christopher/ETL/architecture-medaillon.jpg)
+![Architecture en médaillon](Architecture/Job/architecture-medaillon.jpg)
 
 | Couche | Contenu | Accès |
 |---|---|---|
