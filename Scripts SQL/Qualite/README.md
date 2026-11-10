@@ -18,6 +18,8 @@ Choisir un identifiant de lot adapté, ainsi que la version de clé utilisée po
 
 L'enchaînement s'arrête si Silver échoue. Gold travaille ensuite dans une base et un répertoire de préparation distincts, vérifie le Silver publié, les schémas Gold, la réconciliation des quatre faits, les doublons, les références et les rejets. Il mesure aussi les valeurs NULL de chaque attribut des tables Gold. Si un contrôle est absent, invalide ou en anomalie, ou si Gold comporte des rejets, la publication est bloquée. Les rejets Silver sont décrits dans le rapport et nécessitent une analyse métier ; leur présence ne constitue pas à elle seule une erreur technique bloquante.
 
+Les deux couches ne sont pas publiées dans une transaction commune. Si Silver est publié puis que Gold échoue, Silver contient le nouveau lot mais Gold conserve normalement l'ancien ; le rapport courant n'est pas mis à jour. Maintenir les lectures suspendues et examiner l'échec avant de relancer Gold pour ce lot. En cas de retour arrière incomplet, suivre les consignes de reprise ci-dessous.
+
 Pour alimenter Gold seul avec le Silver déjà publié, utiliser **le même identifiant de lot** que celui inscrit dans l'audit Silver :
 
 ```bash
