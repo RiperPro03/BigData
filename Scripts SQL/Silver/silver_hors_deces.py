@@ -417,7 +417,7 @@ def satisfaction(run):
         values = [data[name] for name in C.names('satisfaction')]
         data['_payload'] = rules.payload_hash(values)
         return tuple([data[name] for name in C.names('satisfaction')] +
-                     [data[name] for name, unused in META])
+                     [data[name] for name, unused in C.META])
     combined = None
     for year in (2017, 2019, 2020):
         df = run.normalized('satisfaction_' + str(year), 'satisfaction', C.TABLES['satisfaction'], {'year': year})
