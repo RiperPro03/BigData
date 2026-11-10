@@ -2,7 +2,32 @@
 """Phase 02 : traitement des deces et registre des cles."""
 import hashlib
 import json
-import silver_hors_deces as C
+import re
+import silver_pipeline as C
+import silver_hors_deces as rules
+
+
+def transform_deces(row):
+    """Applique les regles des deces sans publier les donnees de naissance."""
+    warnings = []
+    try:
+        death = rules.date_value(row.get('date_deces'), required=True)
+        try:
+            birth = rules.date_value(row.get('date_naissance'))
+        except rules.Invalid:
+            birth = None
+            warnings.append('NAISSANCE_INVALIDE')
+        if birth is not None and birth > death:
+            raise rules.Invalid('NAISSANCE_APRES_DECES')
+        code = rules.clean(row.get('code_lieu_deces')) or 'inconnu'
+        department = None
+        if code != 'inconnu' and re.match(r'^(?:[0-9]{5}|2[AB][0-9]{3})$', code):
+            department = code[:3] if code.startswith(('97', '98')) else code[:2]
+        out = {'date_deces': death, 'sexe': rules.sex(row.get('sexe')),
+               'code_commune_deces': code, 'code_departement': department}
+        return out, 'VALID', '', '|'.join(warnings)
+    except rules.Invalid as error:
+        return {}, 'REJECT', str(error), '|'.join(warnings)
 
 def deces(run):
     from pyspark.sql import functions as F

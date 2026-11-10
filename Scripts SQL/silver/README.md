@@ -1,51 +1,44 @@
-# Alimentation Silver en trois etapes
+# Alimentation Silver
 
-- `silver_hors_deces.py` : sources et transformations hors deces ; il contient
-  aussi la configuration et les fonctions communes de lecture et de controle.
-- `silver_deces.py` : traite les deces et conserve le registre des cles.
-- `silver_controles.py` : controle les resultats des deux phases et publie Silver.
+Quatre scripts compatibles avec Spark 1.6 et Python 2.6 :
 
-Les trois fichiers doivent etre dans le meme dossier sans espace sur la VM.
-Ils sont concus pour Spark 1.6 / Python 2.6. Voici un exemple avec un meme lot :
+| Script | Rôle |
+| --- | --- |
+| `silver_pipeline.py` | Vérifie les prérequis, lance les phases dans l'ordre et publie le Silver après validation. Contient aussi la configuration, les schémas et les services partagés. |
+| `silver_hors_deces.py` | Prépare les référentiels, patients, professionnels, consultations, hospitalisations et la satisfaction. |
+| `silver_deces.py` | Prépare les décès et les défunts, et conserve le registre des clés techniques. |
+| `silver_controles.py` | Regroupe les contrôles préalables, les règles de qualité utilisées pendant le traitement et les contrôles finaux. |
+
+Les contrôles de lignes restent exécutés pendant les transformations pour diriger les anomalies vers les rejets. La phase finale vérifie les tables, les clés, les références, les bilans et l'identité du lot avant la publication. Les décès utilisent les référentiels préparés par la première phase : les deux traitements sont séparés, mais ils ne peuvent pas être lancés en parallèle.
+
+Le contrôle final ajoute au rapport JSON le nombre de lignes de satisfaction avec et sans établissement correspondant, ainsi que le taux de correspondance par `identifiant_organisation`. Ce bilan est informatif : il ne rejette pas les sites absents du référentiel, dont le périmètre peut différer.
+
+## Lancement
+
+Copier les quatre fichiers dans un même dossier **sans espace** sur la VM. Par exemple :
 
 ```bash
-cd /home/cloudera/chu_silver_final
-spark-submit --master yarn --deploy-mode client --driver-memory 1g \
-  --executor-memory 1536m --executor-cores 2 --num-executors 1 \
-  --conf spark.dynamicAllocation.enabled=false \
-  --conf spark.yarn.executor.memoryOverhead=1024 \
-  --py-files silver_hors_deces.py,silver_deces.py,silver_controles.py \
-  silver_hors_deces.py --lot-id lot_exemple --attempt-id hors_deces_01 \
-  --hmac-key-file /home/cloudera/.chu/hmac-test.key --key-version test_v1
-
-spark-submit --master yarn --deploy-mode client --driver-memory 1g \
-  --executor-memory 1536m --executor-cores 2 --num-executors 1 \
-  --conf spark.dynamicAllocation.enabled=false \
-  --conf spark.yarn.executor.memoryOverhead=1024 \
-  --py-files silver_hors_deces.py,silver_deces.py,silver_controles.py \
-  silver_deces.py --lot-id lot_exemple --attempt-id deces_01 \
-  --source-attempt hors_deces_01 \
-  --hmac-key-file /home/cloudera/.chu/hmac-test.key --key-version test_v1
-
-spark-submit --master yarn --deploy-mode client --driver-memory 1g \
-  --executor-memory 1536m --executor-cores 2 --num-executors 1 \
-  --conf spark.dynamicAllocation.enabled=false \
-  --conf spark.yarn.executor.memoryOverhead=1024 \
-  --py-files silver_hors_deces.py,silver_deces.py,silver_controles.py \
-  silver_controles.py --lot-id lot_exemple --attempt-id controles_01 \
-  --source-attempt deces_01 \
-  --hmac-key-file /home/cloudera/.chu/hmac-test.key --key-version test_v1
+cd /home/cloudera/chu_silver_v2
+python silver_pipeline.py \
+  --lot-id lot_20261110 \
+  --hmac-key-file /home/cloudera/.chu/hmac-test.key \
+  --key-version test_v1
 ```
 
-Utiliser le meme lot, la meme cle HMAC, la meme version de cle et le meme code
-aux trois etapes. Chaque tentative doit avoir un identifiant nouveau. Les
-checkpoints verifient que les sources Bronze, la configuration et le code ne
-changent pas entre les phases. Un echec peut etre rejoue avec un nouvel
-`attempt-id` et la meme tentative source, tant que ces conditions restent vraies.
+Adapter le lot et la version de clé. Utiliser la même clé que le Silver existant si l'on souhaite conserver les pseudonymes. Ne pas copier la clé dans Git. Une option facultative `--exclude-pseudonyms-file` reprend le fichier d'exclusions de l'ancienne version. Le pipeline alloue automatiquement des identifiants distincts pour les trois tentatives et échoue immédiatement si une phase échoue.
 
-Apres les controles, la phase 03 remplace entierement l'ancien Silver :
-`/user/cloudera/chu/silver/tables`, `rejets` et `audit`. Bronze doit contenir
-toutes les donnees a conserver. Le registre des cles deces et la meme cle HMAC
-sont conserves. `SILVER_REPLACED` confirme la publication ; `SILVER_READY` seul
-indique seulement que les controles sont passes. Ne pas lancer deux alimentations
-Silver en meme temps et suspendre les lectures Gold pendant la publication.
+Avant les traitements, le pipeline vérifie la configuration, la clé, l'état d'écriture HDFS, la présence des fichiers Bronze et la connexion HiveServer2. Les contrôles de schéma des fichiers et le test HMAC entre driver et workers restent également actifs dans Spark. Les erreurs de données sont suivies par motif dans les audits et les rejets ; une erreur technique interrompt le lot.
+
+## Publication et vérification
+
+La phase finale publie seulement si tous les contrôles réussissent. Elle prépare une nouvelle version, vérifie les copies, remplace `/user/cloudera/chu/silver/` et tente de restaurer la version précédente en cas d'échec pendant la bascule. Les chemins publiés restent :
+
+```text
+/user/cloudera/chu/silver/tables/
+/user/cloudera/chu/silver/rejets/
+/user/cloudera/chu/silver/audit/
+```
+
+Le message `SILVER_REPLACED` confirme la fin de la publication. `SILVER_READY` indique seulement que les contrôles préalables à la publication sont passés. Les tentatives de travail restent isolées ; en cas d'échec, l'identifiant du lot et les journaux facilitent le diagnostic. Un nouveau lancement utilise de nouvelles tentatives.
+
+Le traitement remplace entièrement le Silver : Bronze doit contenir toutes les données à conserver. Suspendre les lectures et chargements Gold pendant la publication. Le registre des clés décès et la clé HMAC doivent être conservés ; les chemins Silver et le format ORC restent compatibles avec Gold.
