@@ -181,7 +181,7 @@ def run(lot):
     token=uuid.uuid4().hex[:12]
     run_id=now+'_'+token
     database='gold_work_'+token
-    stage=HDFS+'/.gold_work/'+run_id
+    stage=GOLD+'/.gold_work/'+run_id
     backup=GOLD+'/.gold_previous_'+run_id
     audit=os.path.expanduser('~/.chu/gold_runs/'+run_id)
     os.makedirs(audit,448)
