@@ -296,9 +296,10 @@ def read_records(sc, path, source_id, spec, small_limit):
 def check_header(header, spec):
     if None in header or len(header) != len(set(header)):
         raise ValueError('Colonnes vides ou repetees')
-    missing = set(spec.get('required', spec.get('columns', []))) - set(header)
+    required = [clean(name) for name in spec.get('required', spec.get('columns', []))]
+    missing = set(required) - set(header)
     if missing:
-        raise ValueError('Colonnes requises absentes : ' + ', '.join(sorted(missing)))
+        raise ValueError(u'Colonnes requises absentes : ' + u', '.join(sorted(missing)))
 
 
 
