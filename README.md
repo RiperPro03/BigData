@@ -121,14 +121,3 @@ Mesures prévues, d'après la fiche CNIL « RGPD : établissements de santé » 
 | 4. Exploitation et visualisation | Optimisation, benchmarks avant/après, tableau de bord et storytelling | À venir |
 
 Points encore ouverts : format et fréquence de la source Satisfaction, rattachement des lieux de décès aux régions INSEE, estimation des coûts.
-
-## Organisation du dépôt
-
-Chaque membre de l'équipe dispose de son dossier.
-
-| Dossier | Contenu |
-|---|---|
-| `Christopher/Architecture/` | Schémas de l'architecture globale |
-| `Christopher/ETL/` | Architecture cible et couches Bronze/Silver/Gold (JPEG et PDF) |
-| `Christopher/MLD - Conception/` | Schémas Gold : constellation consultations/hospitalisations et étoiles décès et satisfaction |
-| `Gael/`, `Mathis/`, `Thomas/` | Travaux des autres membres |
